@@ -1,0 +1,4 @@
+flightNumber,aircraftId,airlineId,originStationId,destinationStationId,flightTypeId,scheduledDeparture,scheduledArrival
+TK1234,1,1,1,2,1,2024-01-15T10:30:00,2024-01-15T12:30:00
+LH5678,2,2,3,1,1,2024-01-15T11:45:00,2024-01-15T14:45:00
+TK9876,1,1,2,1,1,2024-01-15T13:00:00,2024-01-15T15:00:00

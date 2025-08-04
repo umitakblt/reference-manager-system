@@ -1,0 +1,19 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-status-description-to-flight
+      author: umit
+      changes:
+        - addColumn:
+            tableName: flight
+            columns:
+              - column:
+                  name: status
+                  type: VARCHAR(20)
+                  defaultValue: "ON_TIME"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: description
+                  type: TEXT
+                  constraints:
+                    nullable: true

@@ -1,0 +1,16 @@
+describe('Uçuş Ekleme E2E', () => {
+  it('Formu doldurup uçuş ekler', () => {
+    cy.visit('/flights/create')
+    cy.get('input#flightNumber').type('TK1234')
+    cy.get('select#airline').select(1)
+    cy.get('select#aircraftType').select(1)
+    cy.get('input#origin').type('IST')
+    cy.get('input#destination').type('ESB')
+    cy.get('input#date').type('2024-06-10')
+    cy.get('input#std').type('10:00')
+    cy.get('input#sta').type('11:15')
+    cy.get('input[type=radio][value=Passenger]').check({ force: true })
+    cy.get('form').submit()
+    cy.contains('Uçuş başarıyla kaydedildi!').should('be.visible')
+  })
+}) 
