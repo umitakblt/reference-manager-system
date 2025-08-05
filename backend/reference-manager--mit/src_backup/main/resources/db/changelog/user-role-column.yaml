@@ -1,0 +1,14 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-role-to-user
+      author: umit
+      changes:
+        - addColumn:
+            tableName: app_user
+            columns:
+              - column:
+                  name: role
+                  type: VARCHAR(20)
+                  defaultValue: "USER"
+                  constraints:
+                    nullable: false

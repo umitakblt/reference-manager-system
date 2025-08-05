@@ -1,0 +1,55 @@
+databaseChangeLog:
+  - changeSet:
+      id: 9
+      author: umit
+      changes:
+        - createTable:
+            tableName: flight_archive
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: flight_number
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: airline_name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: aircraft_model
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: origin_station_code
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: destination_station_code
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: scheduled_departure
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+              - column:
+                  name: scheduled_arrival
+                  type: DATETIME
+                  constraints:
+                    nullable: true
+              - column:
+                  name: flight_type_name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false

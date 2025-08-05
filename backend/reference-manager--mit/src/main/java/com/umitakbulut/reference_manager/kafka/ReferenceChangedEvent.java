@@ -8,6 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReferenceChangedEvent {
+
     private String entity;
     private Long entityId;
     private String operation;

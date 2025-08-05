@@ -2,6 +2,7 @@ package com.umitakbulut.reference_manager.kafka;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.umitakbulut.reference_manager.dto.response.FlightResponseDTO;
 import com.umitakbulut.reference_manager.entity.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +18,9 @@ public class KafkaProducer {
     private final ObjectMapper objectMapper;
 
     public void sendFlight(Flight flight) {
-        sendMessage("flight-topic", flight);
+
+        FlightResponseDTO flightDTO = convertFlightToDTO(flight);
+        sendMessage("flight-topic", flightDTO);
     }
 
     public void sendFlightType(FlightType flightType) {
@@ -60,5 +63,41 @@ public class KafkaProducer {
         } catch (JsonProcessingException e) {
             log.error("Kafka mesajı serileştirilirken hata oluştu", e);
         }
+    }
+
+
+    private FlightResponseDTO convertFlightToDTO(Flight flight) {
+        FlightResponseDTO dto = new FlightResponseDTO();
+        dto.setId(flight.getId());
+        dto.setFlightNumber(flight.getFlightNumber());
+        dto.setScheduledDeparture(flight.getScheduledDeparture());
+        dto.setScheduledArrival(flight.getScheduledArrival());
+        dto.setStatus(flight.getStatus());
+        dto.setDescription(flight.getDescription());
+        
+        if (flight.getAirline() != null) {
+            dto.setAirlineId(flight.getAirline().getId());
+            dto.setAirlineName(flight.getAirline().getName());
+        }
+        if (flight.getAircraft() != null) {
+            dto.setAircraftId(flight.getAircraft().getId());
+            dto.setAircraftModel(flight.getAircraft().getModel());
+        }
+        if (flight.getOriginStation() != null) {
+            dto.setOriginStationId(flight.getOriginStation().getId());
+            dto.setOriginStationName(flight.getOriginStation().getName());
+            dto.setOriginStationCode(flight.getOriginStation().getCode());
+        }
+        if (flight.getDestinationStation() != null) {
+            dto.setDestinationStationId(flight.getDestinationStation().getId());
+            dto.setDestinationStationName(flight.getDestinationStation().getName());
+            dto.setDestinationStationCode(flight.getDestinationStation().getCode());
+        }
+        if (flight.getFlightType() != null) {
+            dto.setFlightTypeId(flight.getFlightType().getId());
+            dto.setFlightTypeName(flight.getFlightType().getName());
+        }
+        
+        return dto;
     }
 }

@@ -4,10 +4,9 @@ import router from '../router'
 import { ElMessage } from 'element-plus'
 
 const api = axios.create({
-  baseURL: 'http://localhost:8083/api/v1'
+  baseURL: 'http://localhost:8083/api'
 })
 
-// Request interceptor to add JWT token
 api.interceptors.request.use(
   (config) => {
     const token = getToken()
@@ -21,7 +20,6 @@ api.interceptors.request.use(
   }
 )
 
-// Response interceptor to handle token expiration
 api.interceptors.response.use(
   (response) => {
     return response
@@ -31,7 +29,6 @@ api.interceptors.response.use(
       logout()
       router.push('/login')
     }
-    // Hata mesajını kullanıcıya göster
     const msg = error.response?.data?.message || error.message || 'Bilinmeyen bir hata oluştu'
     ElMessage.error(msg)
     return Promise.reject(error)

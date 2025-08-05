@@ -11,7 +11,6 @@
       </div>
     </div>
 
-    <!-- Header Section -->
     <el-row :gutter="24">
       <el-col :span="24">
         <div class="header-section">
@@ -44,7 +43,6 @@
       </el-col>
     </el-row>
 
-    <!-- Statistics Cards -->
     <el-row :gutter="24" class="stats-section">
       <el-col :xs="24" :sm="12" :md="6">
         <div class="stat-card total-flights">
@@ -123,7 +121,6 @@
       </el-col>
     </el-row>
 
-    <!-- Charts and Quick Actions -->
     <el-row :gutter="24" class="content-section">
       <el-col :xs="24" :lg="16">
         <div class="chart-card">
@@ -222,7 +219,6 @@
       </el-col>
     </el-row>
 
-    <!-- System Status and Recent Flights -->
     <el-row :gutter="24" class="bottom-section">
       <el-col :xs="24" :lg="12" v-if="canPerformAction('view-system-status')">
         <div class="status-card">
@@ -389,9 +385,9 @@ export default {
       datasets: [{
         data: [0, 0, 0],
         backgroundColor: [
-          '#10b981', // Yeşil - Zamanında
-          '#f59e0b', // Turuncu - Gecikmeli
-          '#ef4444'  // Kırmızı - İptal
+          '#10b981',
+          '#f59e0b',
+          '#ef4444'
         ],
         borderWidth: 0,
         hoverOffset: 4
@@ -445,7 +441,7 @@ export default {
 
     const loadStats = async () => {
       try {
-        const response = await api.get('/flights')
+        const response = await api.get('/v1/flights')
         const flights = response.data
         
         const onTimeCount = flights.filter(f => f.status === 'ON_TIME').length
@@ -497,7 +493,7 @@ export default {
     const loadRecentFlights = async () => {
       loading.recentFlights = true
       try {
-        const response = await api.get('/flights')
+        const response = await api.get('/v1/flights')
         recentFlights.value = response.data.slice(0, 5)
       } catch (error) {
         console.error('Error loading recent flights:', error)
@@ -508,7 +504,7 @@ export default {
     
     const checkDatabaseStatus = async () => {
       try {
-        await api.get('/test/health')
+        await api.get('/v1/test/health')
         dbStatus.value = true
       } catch (error) {
         dbStatus.value = false
@@ -609,7 +605,6 @@ export default {
   overflow-x: hidden;
 }
 
-/* Animated Background */
 .dashboard-background {
   position: fixed;
   top: 0;
@@ -1035,7 +1030,6 @@ export default {
   z-index: 2;
 }
 
-/* Bottom Section */
 .bottom-section {
   margin-bottom: 32px;
 }

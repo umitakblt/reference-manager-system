@@ -20,7 +20,7 @@
       router
     >
       <div class="sidebar-header">
-        <div class="logo-container">
+        <div class="logo-container" @click="goToDashboard" style="cursor: pointer;">
           <div class="airplane-icon">
             <el-icon><Promotion /></el-icon>
           </div>
@@ -68,7 +68,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { 
   House, 
   Location, 
@@ -90,8 +90,12 @@ import {
 import { canPerformAction, isAdmin, isUser } from '../services/authService'
 
 const route = useRoute()
+const router = useRouter()
 
-// Props tanımla
+const goToDashboard = () => {
+  router.push('/dashboard')
+}
+
 const props = defineProps({
   isCollapse: {
     type: Boolean,
@@ -101,19 +105,15 @@ const props = defineProps({
 
 const activeIndex = computed(() => route.path)
 
-// Emit tanımla
 const emit = defineEmits(['toggle-collapse'])
 
-// Sidebar genişliği için reactive değişken
 const sidebarWidth = ref(280)
 const isResizing = ref(false)
 const startX = ref(0)
 const startWidth = ref(0)
 
-// Sidebar durumu değiştiğinde parent'a bildir
 watch(() => props.isCollapse, (newValue) => {
   emit('toggle-collapse', newValue)
-  // Collapse durumunda genişliği ayarla
   if (newValue && sidebarWidth.value > 0) {
     sidebarWidth.value = 80
   } else if (!newValue && sidebarWidth.value === 80) {
@@ -121,7 +121,6 @@ watch(() => props.isCollapse, (newValue) => {
   }
 })
 
-// Resize başlatma fonksiyonu
 const startResize = (event) => {
   event.preventDefault()
   isResizing.value = true
@@ -134,7 +133,6 @@ const startResize = (event) => {
   document.addEventListener('touchend', stopResize)
 }
 
-// Resize işleme fonksiyonu
 const handleResize = (event) => {
   if (!isResizing.value) return
   
@@ -145,7 +143,6 @@ const handleResize = (event) => {
   sidebarWidth.value = newWidth
 }
 
-// Resize durdurma fonksiyonu
 const stopResize = () => {
   isResizing.value = false
   document.removeEventListener('mousemove', handleResize)
@@ -154,7 +151,6 @@ const stopResize = () => {
   document.removeEventListener('touchend', stopResize)
 }
 
-// Tamamen kapatma fonksiyonu
 const toggleFullClose = () => {
   if (sidebarWidth.value > 0) {
     sidebarWidth.value = 0
@@ -163,7 +159,6 @@ const toggleFullClose = () => {
   }
 }
 
-// Component unmount olduğunda event listener'ları temizle
 onUnmounted(() => {
   document.removeEventListener('mousemove', handleResize)
   document.removeEventListener('mouseup', stopResize)
@@ -171,7 +166,6 @@ onUnmounted(() => {
   document.removeEventListener('touchend', stopResize)
 })
 
-    // Menü öğelerini rol tabanlı filtreleme
     const menuItems = computed(() => {
       const items = [
         {
@@ -236,16 +230,13 @@ onUnmounted(() => {
         }
       ]
       
-      // Kullanıcının rollerine göre menü öğelerini filtrele
       return items.filter(item => {
-        // Rol kontrolü
         const hasRole = item.roles.some(role => {
           if (role === 'ADMIN') return isAdmin()
           if (role === 'USER') return isUser()
           return false
         })
         
-        // İşlem yetkisi kontrolü (eğer belirtilmişse)
         const hasAction = !item.action || canPerformAction(item.action)
         
         return hasRole && hasAction
@@ -328,6 +319,14 @@ onUnmounted(() => {
   align-items: center;
   gap: 12px;
   margin-bottom: 8px;
+  transition: all 0.3s ease;
+  border-radius: 12px;
+  padding: 8px;
+}
+
+.logo-container:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
 }
 
 .airplane-icon {

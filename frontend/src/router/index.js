@@ -141,40 +141,33 @@ const router = createRouter({
   routes
 })
 
-// Navigation guard for authentication and authorization
 router.beforeEach((to, from, next) => {
   const token = sessionStorage.getItem('jwt')
   
-  // Test sayfaları için authentication gerekmez
   if (to.path === '/test' || to.path === '/database-test' || to.path === '/api-test' || to.path === '/websocket-test' || to.path === '/native-websocket-test') {
     next()
     return
   }
   
-  // Login sayfasına gidiyorsa ve token varsa dashboard'a yönlendir
   if (to.path === '/login' && token) {
     next('/dashboard')
     return
   }
   
-  // Authentication gerektiren sayfalara gidiyorsa ve token yoksa login'e yönlendir
   if (to.meta.requiresAuth && !token) {
     next('/login')
     return
   }
   
-  // Rol tabanlı erişim kontrolü - sadece authentication gerektiren sayfalar için
   if (to.meta.requiresAuth && to.meta.roles && to.name && token) {
     const pageName = to.name
     
     if (!canAccessPage(pageName)) {
-      // Yetkisiz erişim durumunda dashboard'a yönlendir
       next('/dashboard')
       return
     }
   }
   
-  // Diğer durumlar için devam et
   next()
 })
 

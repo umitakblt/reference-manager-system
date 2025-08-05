@@ -17,5 +17,6 @@ public class AircraftRequestDTO implements Serializable {
 
     private String name;
     private String model;
+    private String manufacturer;
     private Integer capacity;
 }

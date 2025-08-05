@@ -1,6 +1,6 @@
 <template>
   <div class="flight-archive">
-    <!-- Header Section -->
+
     <div class="archive-header">
       <div class="header-content">
         <div class="header-text">
@@ -22,7 +22,6 @@
       </div>
     </div>
 
-    <!-- Statistics Cards -->
     <div class="stats-section">
       <el-row :gutter="20">
         <el-col :xs="24" :sm="12" :md="6">
@@ -87,7 +86,6 @@
       </el-row>
     </div>
 
-    <!-- Filters and Search -->
     <div class="filters-section">
       <div class="filters-card">
         <div class="filters-header">
@@ -163,7 +161,6 @@
       </div>
     </div>
 
-    <!-- Archive Table -->
     <div class="table-section">
       <div class="table-card">
         <div class="table-header">
@@ -188,7 +185,7 @@
             :row-class-name="getRowClassName"
             @row-click="handleRowClick"
           >
-            <el-table-column prop="flightNumber" label="Uçuş No" width="120">
+            <el-table-column prop="flightNumber" label="Uçuş No" width="150" fixed="left" align="center" header-align="center">
               <template #default="scope">
                 <div class="flight-number">
                   <span class="number">{{ scope.row.flightNumber }}</span>
@@ -196,7 +193,7 @@
               </template>
             </el-table-column>
             
-            <el-table-column label="Havayolu" width="180">
+            <el-table-column label="Havayolu" width="220" align="center" header-align="center">
               <template #default="scope">
                 <div class="airline-info">
                   <div class="airline-logo">
@@ -209,7 +206,7 @@
               </template>
             </el-table-column>
             
-            <el-table-column label="Uçak" width="200">
+            <el-table-column label="Uçak" width="250" align="center" header-align="center">
               <template #default="scope">
                 <div class="aircraft-info">
                   <div class="aircraft-icon">
@@ -222,7 +219,7 @@
               </template>
             </el-table-column>
             
-            <el-table-column label="Rota" width="250">
+            <el-table-column label="Rota" width="300" align="center" header-align="center">
               <template #default="scope">
                 <div class="route-info">
                   <div class="route-origin">
@@ -240,7 +237,7 @@
               </template>
             </el-table-column>
             
-            <el-table-column label="Zaman" width="200">
+            <el-table-column label="Zaman" width="250" align="center" header-align="center">
               <template #default="scope">
                 <div class="time-info">
                   <div class="departure-time">
@@ -255,7 +252,7 @@
               </template>
             </el-table-column>
             
-            <el-table-column prop="status" label="Durum" width="120">
+            <el-table-column prop="status" label="Durum" width="150" fixed="right" align="center" header-align="center">
               <template #default="scope">
                 <div class="status-badge" :class="getStatusClass(scope.row.status)">
                   <el-icon><CircleCheck v-if="scope.row.status === 'ON_TIME'" /><Clock v-else-if="scope.row.status === 'DELAYED'" /><Close v-else /></el-icon>
@@ -264,7 +261,7 @@
               </template>
             </el-table-column>
             
-            <el-table-column prop="archivedAt" label="Arşivlenme" width="150">
+            <el-table-column prop="archivedAt" label="Arşivlenme" width="180" fixed="right" align="center" header-align="center">
               <template #default="scope">
                 <div class="archive-date">
                   <span class="date">{{ formatDate(scope.row.archivedAt) }}</span>
@@ -275,7 +272,6 @@
           </el-table>
         </div>
         
-        <!-- Pagination -->
         <div class="pagination-section">
           <el-pagination
             v-model:current-page="currentPage"
@@ -319,12 +315,10 @@ export default {
     const currentPage = ref(1)
     const pageSize = ref(20)
     
-    // Referans veriler
     const airlines = ref([])
     const aircrafts = ref([])
     const stations = ref([])
     
-    // Filtreler
     const filters = reactive({
       airline: null,
       status: null,
@@ -335,7 +329,7 @@ export default {
     const loadArchivedFlights = async () => {
       loading.value = true
       try {
-        const response = await api.get('/flights/archive')
+        const response = await api.get('/v1/flights/archive')
         archivedFlights.value = response.data
       } catch (error) {
         ElMessage.error('Arşivlenmiş uçuşlar yüklenirken hata oluştu')
@@ -348,9 +342,9 @@ export default {
     const loadReferenceData = async () => {
       try {
         const [airlinesRes, aircraftsRes, stationsRes] = await Promise.all([
-          api.get('/airlines'),
-          api.get('/aircrafts'),
-          api.get('/stations')
+          api.get('/v1/airlines'),
+          api.get('/v1/aircrafts'),
+          api.get('/v1/stations')
         ])
         
         airlines.value = airlinesRes.data
@@ -362,7 +356,6 @@ export default {
       }
     }
     
-    // Filtreleme
     const filteredFlights = computed(() => {
       let filtered = archivedFlights.value
       
@@ -394,7 +387,6 @@ export default {
       return filtered
     })
     
-    // İstatistikler
     const getCompletedCount = () => {
       return archivedFlights.value.filter(f => f.status === 'ON_TIME').length
     }
@@ -407,7 +399,6 @@ export default {
       return archivedFlights.value.filter(f => f.status === 'CANCELLED').length
     }
     
-    // Yardımcı fonksiyonlar
     const getAirlineName = (airlineId) => {
       const airline = airlines.value.find(a => a.id === airlineId)
       return airline ? airline.name : `ID: ${airlineId}`
@@ -514,7 +505,6 @@ export default {
     const exportArchive = async () => {
       try {
         exporting.value = true
-        // Export işlemi simülasyonu
         await new Promise(resolve => setTimeout(resolve, 2000))
         ElMessage.success('Arşiv başarıyla dışa aktarıldı')
       } catch (error) {
@@ -716,7 +706,6 @@ export default {
   font-weight: 500;
 }
 
-/* Filters Section */
 .filters-section {
   margin-bottom: 32px;
 }
@@ -746,7 +735,6 @@ export default {
   margin: 0;
 }
 
-/* Table Section */
 .table-section {
   margin-bottom: 32px;
 }
@@ -782,9 +770,11 @@ export default {
 
 .table-container {
   padding: 0 24px 24px 24px;
+  overflow-x: auto;
+  width: 100%;
+  min-width: 1200px;
 }
 
-/* Table Styles */
 .flight-number .number {
   font-weight: 700;
   color: #6366f1;
@@ -849,14 +839,17 @@ export default {
 .time-info {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
+  align-items: center;
+  justify-content: center;
 }
 
 .departure-time,
 .arrival-time {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
+  gap: 8px;
 }
 
 .time-label {
@@ -875,12 +868,15 @@ export default {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 12px;
+  padding: 8px 12px;
   border-radius: 8px;
   font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  min-width: 100px;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .status-success {

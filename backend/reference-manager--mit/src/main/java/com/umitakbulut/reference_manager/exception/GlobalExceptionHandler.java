@@ -15,7 +15,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Map<String, String>> handleIllegalArgumentException(IllegalArgumentException e) {
-        log.error("❌ Geçersiz argüman hatası: ", e);
+        log.error("Geçersiz argüman hatası: ", e);
         
         Map<String, String> errorResponse = new HashMap<>();
         errorResponse.put("error", "Geçersiz veri");
@@ -26,7 +26,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<Map<String, String>> handleNotFoundException(NotFoundException e) {
-        log.error("❌ Kayıt bulunamadı hatası: ", e);
+        log.error("Kayıt bulunamadı hatası: ", e);
         
         Map<String, String> errorResponse = new HashMap<>();
         errorResponse.put("error", "Kayıt bulunamadı");
@@ -37,7 +37,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, String>> handleGenericException(Exception e) {
-        log.error("❌ Genel hata: ", e);
+        log.error("Genel hata: ", e);
         
         Map<String, String> errorResponse = new HashMap<>();
         errorResponse.put("error", "Sunucu hatası");

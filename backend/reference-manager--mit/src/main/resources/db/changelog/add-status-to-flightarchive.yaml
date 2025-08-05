@@ -1,0 +1,18 @@
+databaseChangeLog:
+  - changeSet:
+      id: 10
+      author: umit
+      changes:
+        - addColumn:
+            tableName: flight_archive
+            columns:
+              - column:
+                  name: status
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: description
+                  type: TEXT
+                  constraints:
+                    nullable: true 

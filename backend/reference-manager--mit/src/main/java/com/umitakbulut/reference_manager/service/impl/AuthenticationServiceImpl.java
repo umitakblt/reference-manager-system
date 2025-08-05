@@ -36,7 +36,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         repository.save(user);
         var jwtToken = jwtService.generateToken(user);
         
-        // Kullanıcı rollerini al
         List<String> roles = user.getAuthorities().stream()
                 .map(authority -> authority.getAuthority())
                 .collect(Collectors.toList());
@@ -62,7 +61,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .orElseThrow();
         var jwtToken = jwtService.generateToken(user);
         
-        // Kullanıcı rollerini al
         List<String> roles = user.getAuthorities().stream()
                 .map(authority -> authority.getAuthority())
                 .collect(Collectors.toList());

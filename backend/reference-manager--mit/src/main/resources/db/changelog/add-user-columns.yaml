@@ -1,0 +1,56 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-user-columns-001
+      author: umit
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            columnExists:
+              tableName: app_user
+              columnName: first_name
+      changes:
+        - addColumn:
+            tableName: app_user
+            columns:
+              - column:
+                  name: first_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: true
+  - changeSet:
+      id: add-user-columns-002
+      author: umit
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            columnExists:
+              tableName: app_user
+              columnName: last_name
+      changes:
+        - addColumn:
+            tableName: app_user
+            columns:
+              - column:
+                  name: last_name
+                  type: varchar(255)
+                  constraints:
+                    nullable: true
+  - changeSet:
+      id: add-user-columns-003
+      author: umit
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            columnExists:
+              tableName: app_user
+              columnName: enabled
+      changes:
+        - addColumn:
+            tableName: app_user
+            columns:
+              - column:
+                  name: enabled
+                  type: boolean
+                  defaultValueBoolean: true
+                  constraints:
+                    nullable: false 

@@ -18,7 +18,7 @@ public class FlightCsvController {
     @PostMapping("/import")
     public ResponseEntity<?> importFlights(@RequestParam("file") MultipartFile file) {
         try {
-            flightCsvService.importFlightsFromCsv(file.getInputStream()); // ✅ Hata buradan çözülür
+            flightCsvService.importFlightsFromCsv(file.getInputStream());
             return ResponseEntity.ok("CSV içeri aktarıldı");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Hata: " + e.getMessage());

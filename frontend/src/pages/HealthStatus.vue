@@ -196,23 +196,18 @@ let healthCheckInterval = null
 
 const loadHealthStatus = async () => {
   try {
-    // Mevcut backend endpoint'lerini test et
     const [usersRes, flightsRes, airlinesRes] = await Promise.all([
-      api.get('/users').catch(() => ({ data: [] })),
-      api.get('/flights').catch(() => ({ data: [] })),
-      api.get('/airlines').catch(() => ({ data: [] }))
+      api.get('/v1/users').catch(() => ({ data: [] })),
+      api.get('/v1/flights').catch(() => ({ data: [] })),
+      api.get('/v1/airlines').catch(() => ({ data: [] }))
     ])
     
-    // API durumu
     apiStatus.value = 'healthy'
     
-    // Veritabanı durumu (endpoint'ler çalışıyorsa veritabanı da çalışıyor)
     databaseStatus.value = 'healthy'
     
-    // Genel durum
     overallStatus.value = 'healthy'
     
-    // Metrikler
     metrics.value = {
       cpuUsage: 25,
       memoryUsage: 45,
@@ -222,14 +217,12 @@ const loadHealthStatus = async () => {
       errorRate: 0
     }
     
-    // Servisler
     services.value = [
       { name: 'User Service', status: 'healthy', responseTime: 45, lastCheck: '2024-01-15 10:30:00' },
       { name: 'Flight Service', status: 'healthy', responseTime: 120, lastCheck: '2024-01-15 10:30:00' },
       { name: 'Airline Service', status: 'healthy', responseTime: 80, lastCheck: '2024-01-15 10:30:00' }
     ]
     
-    // Sistem logları
     systemLogs.value = [
       { id: 1, timestamp: new Date().toISOString(), level: 'INFO', message: 'Sistem başlatıldı' },
       { id: 2, timestamp: new Date(Date.now() - 15000).toISOString(), level: 'INFO', message: 'API servisleri aktif' },
@@ -311,7 +304,6 @@ const clearLogs = () => {
 
 const exportLogs = async () => {
   try {
-    // Mevcut log verilerini JSON formatında dışa aktar
     const logData = systemLogs.value.map(log => 
       `${log.timestamp} [${log.level}] ${log.message}`
     ).join('\n')
@@ -334,7 +326,7 @@ const exportLogs = async () => {
 
 onMounted(() => {
   loadHealthStatus()
-  healthCheckInterval = setInterval(loadHealthStatus, 30000) // 30 saniyede bir kontrol
+  healthCheckInterval = setInterval(loadHealthStatus, 30000)
 })
 
 onUnmounted(() => {

@@ -220,7 +220,6 @@ import {
   Check 
 } from '@element-plus/icons-vue'
 
-// Reactive data
 const profileForm = reactive({
   firstName: '',
   lastName: '',
@@ -251,7 +250,6 @@ const changingPassword = ref(false)
 const showChangePassword = ref(false)
 const twoFactorEnabled = ref(false)
 
-// Form validation rules
 const formRules = {
   firstName: [
     { required: true, message: 'Ad alanı zorunludur', trigger: 'blur' },
@@ -293,9 +291,7 @@ const passwordRules = {
   ]
 }
 
-// Methods
 const loadUserProfile = () => {
-  // Simüle edilmiş kullanıcı verileri
   profileForm.firstName = 'Umit'
   profileForm.lastName = 'Akbulut'
   profileForm.email = 'umit@example.com'
@@ -309,11 +305,9 @@ const saveProfile = async () => {
   try {
     saving.value = true
     
-    // Form validasyonu
     const valid = await profileForm.value?.validate()
     if (!valid) return
     
-    // API çağrısı simülasyonu
     await new Promise(resolve => setTimeout(resolve, 1000))
     
     ElMessage.success('Profil başarıyla güncellendi')
@@ -332,17 +326,14 @@ const changePassword = async () => {
   try {
     changingPassword.value = true
     
-    // Form validasyonu
     const valid = await passwordForm.value?.validate()
     if (!valid) return
     
-    // API çağrısı simülasyonu
     await new Promise(resolve => setTimeout(resolve, 1000))
     
     ElMessage.success('Şifre başarıyla değiştirildi')
     showChangePassword.value = false
     
-    // Form temizleme
     passwordForm.currentPassword = ''
     passwordForm.newPassword = ''
     passwordForm.confirmPassword = ''

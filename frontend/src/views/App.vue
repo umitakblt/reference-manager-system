@@ -6,7 +6,7 @@
 
 <script>
 import { onMounted, onUnmounted } from 'vue'
-import nativeWebSocketService from '../services/nativeWebSocketService'
+import nativeWebSocketService from '@/services/nativeWebSocketService'
 
 export default {
   name: 'App',
@@ -15,10 +15,8 @@ export default {
       console.log('🚀 App.vue - Uygulama başlatılıyor, WebSocket bağlantısı kuruluyor...')
       
       try {
-        // Global WebSocket bağlantısını başlat
         await nativeWebSocketService.connect()
         
-        // Bağlantı durumu değişikliklerini dinle
         nativeWebSocketService.onConnectionChange((connected) => {
           if (connected) {
             console.log('✅ App.vue - Global WebSocket bağlantısı aktif')
@@ -36,7 +34,6 @@ export default {
     
     onUnmounted(() => {
       console.log('🚪 App.vue - Uygulama kapatılıyor, WebSocket temizleniyor')
-      // WebSocket bağlantısını kapatma, sadece log
     })
   }
 }

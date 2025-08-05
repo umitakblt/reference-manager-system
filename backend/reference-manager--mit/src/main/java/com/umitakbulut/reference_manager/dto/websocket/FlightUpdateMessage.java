@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @ToString
 public class FlightUpdateMessage {
-    private String action; // "CREATE", "UPDATE", "DELETE"
+    private String action;
     private FlightResponseDTO flight;
     private String message;
     private LocalDateTime timestamp;

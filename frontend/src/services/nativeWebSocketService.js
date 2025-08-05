@@ -10,14 +10,13 @@ class NativeWebSocketService {
         this.messageCallbacks = new Map();
     }
 
-    // WebSocket bağlantısını başlat
     connect() {
         return new Promise((resolve, reject) => {
             try {
                 console.log('Native WebSocket bağlantısı başlatılıyor...');
                 this.isConnecting = true;
                 
-                const wsUrl = 'ws://localhost:8083/websocket';
+                const wsUrl = 'ws://localhost:8083/websocket'
                 this.ws = new WebSocket(wsUrl);
                 
                 this.ws.onopen = (event) => {
@@ -42,7 +41,6 @@ class NativeWebSocketService {
                         this.connectionCallback(false);
                     }
                     
-                    // Yeniden bağlanma denemesi
                     if (this.reconnectAttempts < this.maxReconnectAttempts) {
                         this.reconnectAttempts++;
                         console.log(`Yeniden bağlanma denemesi ${this.reconnectAttempts}/${this.maxReconnectAttempts}`);
@@ -69,14 +67,12 @@ class NativeWebSocketService {
                         const message = JSON.parse(event.data);
                         console.log('Native WebSocket mesajı alındı:', message);
                         
-                        // Mesaj tipine göre callback'leri çağır
                         if (this.messageCallbacks.has(message.type)) {
                             this.messageCallbacks.get(message.type).forEach(callback => {
                                 callback(message);
                             });
                         }
                         
-                        // Genel mesaj callback'i
                         if (this.messageCallbacks.has('*')) {
                             this.messageCallbacks.get('*').forEach(callback => {
                                 callback(message);
@@ -94,7 +90,6 @@ class NativeWebSocketService {
         });
     }
 
-    // Bağlantıyı kes
     disconnect() {
         if (this.ws) {
             this.ws.close();
@@ -104,7 +99,6 @@ class NativeWebSocketService {
         }
     }
 
-    // Mesaj gönder
     send(type, data) {
         if (!this.connected || !this.ws) {
             console.error('WebSocket bağlı değil!');
@@ -125,20 +119,17 @@ class NativeWebSocketService {
         }
     }
 
-    // Mesaj dinleyicisi ekle
     onMessage(type, callback) {
         if (!this.messageCallbacks.has(type)) {
             this.messageCallbacks.set(type, []);
         }
         
-        // Duplicate callback kontrolü
         const callbacks = this.messageCallbacks.get(type);
         if (!callbacks.includes(callback)) {
             callbacks.push(callback);
         }
     }
 
-    // Mesaj dinleyicisini kaldır
     offMessage(type, callback) {
         if (this.messageCallbacks.has(type)) {
             const callbacks = this.messageCallbacks.get(type);
@@ -149,22 +140,18 @@ class NativeWebSocketService {
         }
     }
 
-    // Bağlantı durumunu kontrol et
     isConnected() {
         return this.connected && this.ws && this.ws.readyState === WebSocket.OPEN;
     }
 
-    // Bağlantı durumunu dinle
     onConnectionChange(callback) {
         this.connectionCallback = callback;
     }
 
-    // Ping gönder
     ping() {
         this.send('PING', 'ping');
     }
 
-    // Flight update gönder
     sendFlightUpdate(action, flight) {
         const flightUpdate = {
             action: action,
@@ -174,7 +161,6 @@ class NativeWebSocketService {
         this.send('FLIGHT_UPDATE', flightUpdate);
     }
 
-    // İstatistikleri al
     getStats() {
         return {
             connected: this.connected,
@@ -187,6 +173,5 @@ class NativeWebSocketService {
     }
 }
 
-// Singleton instance
 const nativeWebSocketService = new NativeWebSocketService();
 export default nativeWebSocketService; 
