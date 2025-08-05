@@ -63,28 +63,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDTO updateUser(Long id, RegisterRequestDTO requestDTO) {
-        User existing = userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("User not found"));
-        
-        existing.setEmail(requestDTO.getEmail());
-        existing.setFirstName(requestDTO.getFirstName());
-        existing.setLastName(requestDTO.getLastName());
-        existing.setRole(requestDTO.getRole());
-        existing.setEnabled(requestDTO.getEnabled());
-        
-        if (requestDTO.getPassword() != null && !requestDTO.getPassword().trim().isEmpty()) {
-            existing.setPassword(passwordEncoder.encode(requestDTO.getPassword()));
-        }
-        
-        User saved = userRepository.save(existing);
-
-        kafkaProducer.sendUser(saved);
-
-        return mapUserWithRoles(saved);
-    }
-
-    @Override
     public UserResponseDTO updateUser(Long id, UserUpdateRequestDTO requestDTO) {
         User existing = userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User not found"));

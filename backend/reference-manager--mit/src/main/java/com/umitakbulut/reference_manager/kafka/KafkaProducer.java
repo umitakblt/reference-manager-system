@@ -18,7 +18,7 @@ public class KafkaProducer {
     private final ObjectMapper objectMapper;
 
     public void sendFlight(Flight flight) {
-        // Flight entity'sini FlightResponseDTO'ya dönüştür
+
         FlightResponseDTO flightDTO = convertFlightToDTO(flight);
         sendMessage("flight-topic", flightDTO);
     }
@@ -65,10 +65,7 @@ public class KafkaProducer {
         }
     }
 
-    /**
-     * Flight entity'sini FlightResponseDTO'ya dönüştürür
-     * Bu sayede lazy loading sorununu önler
-     */
+
     private FlightResponseDTO convertFlightToDTO(Flight flight) {
         FlightResponseDTO dto = new FlightResponseDTO();
         dto.setId(flight.getId());
@@ -78,7 +75,6 @@ public class KafkaProducer {
         dto.setStatus(flight.getStatus());
         dto.setDescription(flight.getDescription());
         
-        // Lazy loading sorununu önlemek için null kontrolü yap
         if (flight.getAirline() != null) {
             dto.setAirlineId(flight.getAirline().getId());
             dto.setAirlineName(flight.getAirline().getName());

@@ -76,12 +76,11 @@ public class FlightServiceImpl implements FlightService {
         
         Flight savedFlight = flightRepository.save(flight);
         
-        // Kafka producer'ı try-catch ile saralım
         try {
             kafkaProducer.sendFlight(savedFlight);
-            System.out.println("✅ Kafka mesajı gönderildi: " + savedFlight.getFlightNumber());
+            System.out.println(" Kafka mesajı gönderildi: " + savedFlight.getFlightNumber());
         } catch (Exception e) {
-            System.err.println("❌ Kafka mesajı gönderilemedi: " + e.getMessage());
+            System.err.println(" Kafka mesajı gönderilemedi: " + e.getMessage());
         }
         
         sendFlightUpdateMessage("CREATE", savedFlight, "Yeni uçuş oluşturuldu");

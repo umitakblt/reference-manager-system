@@ -1,6 +1,6 @@
 <template>
   <div class="flight-archive">
-    <!-- Header Section -->
+
     <div class="archive-header">
       <div class="header-content">
         <div class="header-text">
@@ -22,7 +22,6 @@
       </div>
     </div>
 
-    <!-- Statistics Cards -->
     <div class="stats-section">
       <el-row :gutter="20">
         <el-col :xs="24" :sm="12" :md="6">
@@ -87,7 +86,6 @@
       </el-row>
     </div>
 
-    <!-- Filters and Search -->
     <div class="filters-section">
       <div class="filters-card">
         <div class="filters-header">
@@ -163,7 +161,6 @@
       </div>
     </div>
 
-    <!-- Archive Table -->
     <div class="table-section">
       <div class="table-card">
         <div class="table-header">
@@ -275,7 +272,6 @@
           </el-table>
         </div>
         
-        <!-- Pagination -->
         <div class="pagination-section">
           <el-pagination
             v-model:current-page="currentPage"
@@ -710,7 +706,6 @@ export default {
   font-weight: 500;
 }
 
-/* Filters Section */
 .filters-section {
   margin-bottom: 32px;
 }
@@ -740,7 +735,6 @@ export default {
   margin: 0;
 }
 
-/* Table Section */
 .table-section {
   margin-bottom: 32px;
 }
@@ -781,7 +775,6 @@ export default {
   min-width: 1200px;
 }
 
-/* Table Styles */
 .flight-number .number {
   font-weight: 700;
   color: #6366f1;

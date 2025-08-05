@@ -1,14 +1,13 @@
 <template>
   <div class="login-container">
-    <!-- Animasyonlu Arka Plan -->
+
     <div class="animated-background">
-      <!-- Uçaklar -->
+
       <div class="airplane airplane-1">✈️</div>
       <div class="airplane airplane-2">✈️</div>
       <div class="airplane airplane-3">✈️</div>
       <div class="airplane airplane-4">✈️</div>
       
-      <!-- Havai Fişekler -->
       <div class="firework firework-1">
         <div class="spark"></div>
         <div class="spark"></div>
@@ -129,12 +128,12 @@
         <div class="spark"></div>
       </div>
       
-      <!-- Bulutlar -->
+      
       <div class="cloud cloud-1">☁️</div>
       <div class="cloud cloud-2">☁️</div>
       <div class="cloud cloud-3">☁️</div>
       
-      <!-- Gradient Overlay -->
+      
       <div class="background-overlay"></div>
     </div>
     
@@ -271,7 +270,6 @@ export default {
   z-index: 1;
 }
 
-/* Uçak Animasyonları */
 .airplane {
   position: absolute;
   font-size: 2rem;
@@ -321,7 +319,6 @@ export default {
   }
 }
 
-/* Havai Fişek Animasyonları */
 .firework {
   position: absolute;
   width: 8px;
@@ -396,7 +393,6 @@ export default {
   z-index: 6;
 }
 
-/* Farklı renkli kıvılcımlar */
 .firework-1 .spark { background: radial-gradient(circle, #ff6b6b, #ffd93d, #6bcf7f); }
 .firework-2 .spark { background: radial-gradient(circle, #4d9de0, #ff8e53, #ff6b9d); }
 .firework-3 .spark { background: radial-gradient(circle, #6bcf7f, #ffd93d, #ff6b6b); }

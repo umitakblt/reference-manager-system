@@ -13,8 +13,6 @@ public interface UserService {
 
     List<UserResponseDTO> getAllUsers();
 
-    UserResponseDTO updateUser(Long id, RegisterRequestDTO requestDTO);
-    
     UserResponseDTO updateUser(Long id, UserUpdateRequestDTO requestDTO);
 
     UserResponseDTO createUser(RegisterRequestDTO requestDTO);

@@ -51,11 +51,7 @@ spring:
           min-idle: 0
           max-wait: -1ms
 
-springdoc:
-  api-docs:
-    path: /api-docs
-  swagger-ui:
-    path: /swagger-ui.html
+
 
 jwt:
   secret: eW91ci1zdXBlci1zZWNyZXQtand0LWtleS1mb3ItZmxpZ2h0LW1hbmFnZW1lbnQtc3lzdGVtLTIwMjQ=

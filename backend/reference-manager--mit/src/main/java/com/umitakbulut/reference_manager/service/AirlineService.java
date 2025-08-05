@@ -17,5 +17,4 @@ public interface AirlineService {
 
     void delete(Long id);
 
-    void deleteAll();
 }

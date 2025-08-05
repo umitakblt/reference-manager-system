@@ -11,7 +11,6 @@
       </div>
     </div>
 
-    <!-- Header Section -->
     <el-row :gutter="24">
       <el-col :span="24">
         <div class="header-section">
@@ -44,7 +43,6 @@
       </el-col>
     </el-row>
 
-    <!-- Statistics Cards -->
     <el-row :gutter="24" class="stats-section">
       <el-col :xs="24" :sm="12" :md="6">
         <div class="stat-card total-flights">
@@ -123,7 +121,6 @@
       </el-col>
     </el-row>
 
-    <!-- Charts and Quick Actions -->
     <el-row :gutter="24" class="content-section">
       <el-col :xs="24" :lg="16">
         <div class="chart-card">
@@ -222,7 +219,6 @@
       </el-col>
     </el-row>
 
-    <!-- System Status and Recent Flights -->
     <el-row :gutter="24" class="bottom-section">
       <el-col :xs="24" :lg="12" v-if="canPerformAction('view-system-status')">
         <div class="status-card">
@@ -609,7 +605,6 @@ export default {
   overflow-x: hidden;
 }
 
-/* Animated Background */
 .dashboard-background {
   position: fixed;
   top: 0;
@@ -1035,7 +1030,6 @@ export default {
   z-index: 2;
 }
 
-/* Bottom Section */
 .bottom-section {
   margin-bottom: 32px;
 }
