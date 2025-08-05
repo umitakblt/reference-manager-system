@@ -11,23 +11,19 @@ class WebSocketService {
         this.connectionCallback = null;
     }
 
-    // WebSocket bağlantısını başlat
     connect() {
         return new Promise((resolve, reject) => {
             try {
                 console.log('WebSocket bağlantısı başlatılıyor...');
                 
-                // SockJS ile bağlantı oluştur - transport seçenekleri ile
-                const socket = new SockJS('http://localhost:8083/ws', null, {
+                const socket = new SockJS('http:
                     transports: ['websocket', 'xhr-streaming', 'xhr-polling'],
                     timeout: 5000
                 });
                 console.log('SockJS bağlantısı oluşturuldu');
                 
-                // Stomp client oluştur - factory ile
                 this.stompClient = Stomp.over(() => socket);
                 
-                // WebSocket event listener'ları ekle
                 socket.onopen = () => {
                     console.log('SockJS bağlantısı açıldı');
                 };
@@ -48,7 +44,6 @@ class WebSocketService {
                     }
                 };
                 
-                // Debug'ı aç
                 this.stompClient.debug = (str) => {
                     console.log('Stomp Debug:', str);
                 };
@@ -68,7 +63,6 @@ class WebSocketService {
                         console.error('WebSocket bağlantı hatası:', error);
                         this.connected = false;
                         
-                        // Yeniden bağlanma denemesi
                         if (this.reconnectAttempts < this.maxReconnectAttempts) {
                             this.reconnectAttempts++;
                             console.log(`Yeniden bağlanma denemesi ${this.reconnectAttempts}/${this.maxReconnectAttempts}`);
@@ -87,7 +81,6 @@ class WebSocketService {
         });
     }
 
-    // Bağlantıyı kes
     disconnect() {
         if (this.stompClient) {
             this.stompClient.disconnect();
@@ -97,7 +90,6 @@ class WebSocketService {
         }
     }
 
-    // Topic'e subscribe ol
     subscribe(topic, callback) {
         if (!this.connected || !this.stompClient) {
             console.error('WebSocket bağlı değil!');
@@ -122,7 +114,6 @@ class WebSocketService {
         }
     }
 
-    // Subscribe'ı iptal et
     unsubscribe(topic) {
         const subscription = this.subscriptions.get(topic);
         if (subscription) {
@@ -135,7 +126,6 @@ class WebSocketService {
         }
     }
 
-    // Mesaj gönder
     send(destination, message) {
         if (!this.connected || !this.stompClient) {
             console.error('WebSocket bağlı değil!');
@@ -149,21 +139,16 @@ class WebSocketService {
         }
     }
 
-    // Bağlantı durumunu kontrol et
     isConnected() {
         return this.connected && this.stompClient;
     }
 
-    // Bağlantı durumunu dinle
     onConnectionChange(callback) {
         if (this.stompClient) {
-            // Yeni API'de event listener'lar zaten tanımlı
-            // onWebSocketClose ve onWebSocketError callback'leri connect metodunda tanımlandı
             this.connectionCallback = callback;
         }
     }
 }
 
-// Singleton instance
 const websocketService = new WebSocketService();
 export default websocketService; 

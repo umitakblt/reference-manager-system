@@ -151,7 +151,7 @@ const reportFilters = ref({
 
 const loadAirlines = async () => {
   try {
-    const response = await api.get('/airlines')
+    const response = await api.get('/v1/airlines')
     airlines.value = response.data
   } catch (error) {
     console.error('Havayolları yüklenirken hata:', error)
@@ -167,7 +167,7 @@ const generateReport = async () => {
       ...reportFilters.value
     }
     
-    const response = await api.get('/reports/flights', { params })
+            const response = await api.get('/v1/reports/flights', { params })
     reportData.value = response.data.content
     total.value = response.data.totalElements
   } catch (error) {
@@ -180,7 +180,7 @@ const generateReport = async () => {
 
 const loadTopRoutes = async () => {
   try {
-    const response = await api.get('/reports/top-routes')
+            const response = await api.get('/v1/reports/top-routes')
     topRoutes.value = response.data
   } catch (error) {
     console.error('En yoğun rotalar yüklenirken hata:', error)
@@ -199,7 +199,7 @@ const handleCurrentChange = (val) => {
 
 const exportReport = async () => {
   try {
-    const response = await api.get('/reports/export', {
+            const response = await api.get('/v1/reports/export', {
       params: reportFilters.value,
       responseType: 'blob'
     })

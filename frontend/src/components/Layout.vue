@@ -75,16 +75,13 @@ import {
   ArrowDown, 
   SwitchButton 
 } from '@element-plus/icons-vue'
-
 const router = useRouter()
 const route = useRoute()
 
 const sidebarCollapsed = ref(false)
 
-// Sidebar durumunu provide et
 provide('sidebarCollapsed', sidebarCollapsed)
 
-// Sayfa başlıklarını tanımla
 const pageTitles = {
   '/dashboard': 'Dashboard',
   '/flights': 'Uçuş Listesi',
@@ -102,7 +99,7 @@ const currentPageTitle = computed(() => {
 })
 
 const userName = ref('Umit')
-const userAvatar = ref('/images/umit-avatar.png')
+const userAvatar = ref('/images/umit-new-avatar.png')
 
 const toggleSidebar = () => {
   sidebarCollapsed.value = !sidebarCollapsed.value
@@ -115,7 +112,6 @@ const handleSidebarToggle = (collapsed) => {
 const handleUserCommand = async (command) => {
   switch (command) {
     case 'profile':
-      // Profil sayfasına yönlendir
       router.push('/profile')
       break
     case 'logout':
@@ -133,14 +129,12 @@ const handleUserCommand = async (command) => {
         await logout()
         router.push('/login')
       } catch (error) {
-        // Kullanıcı iptal etti
       }
       break
   }
 }
 
 onMounted(() => {
-  // Kullanıcı bilgilerini sessionStorage'dan al
   const username = sessionStorage.getItem('username')
   if (username) {
     userName.value = username

@@ -17,33 +17,29 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        // Client'ların subscribe olacağı destination prefix'i
         config.enableSimpleBroker("/topic", "/queue");
         
-        // Client'lardan gelen mesajların destination prefix'i
         config.setApplicationDestinationPrefixes("/app");
         
-        // User destination prefix (kullanıcıya özel mesajlar için)
         config.setUserDestinationPrefix("/user");
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        // WebSocket endpoint'i
         registry.addEndpoint("/ws")
-                .setAllowedOriginPatterns("*") // CORS için
+                .setAllowedOriginPatterns("*")
                 .setAllowedOrigins(
                     "http://localhost:5173"
                 )
-                .withSockJS(); // SockJS desteği
+                .withSockJS();
         
         logger.info("WebSocket endpoint /ws registered with CORS");
     }
 
     @Override
     public void configureWebSocketTransport(WebSocketTransportRegistration registration) {
-        registration.setMessageSizeLimit(64 * 1024) // 64KB
-                   .setSendBufferSizeLimit(512 * 1024) // 512KB
-                   .setSendTimeLimit(20000); // 20 saniye
+        registration.setMessageSizeLimit(64 * 1024)
+                   .setSendBufferSizeLimit(512 * 1024)
+                   .setSendTimeLimit(20000);
     }
 } 

@@ -1,4 +1,3 @@
-// Ortak yardımcı fonksiyonlar
 export function getAirlineName(id, airlines) {
   if (!Array.isArray(airlines)) return id
   const airline = airlines.find(a => a.id === id || a.id === String(id) || a.id === Number(id))
@@ -6,8 +5,12 @@ export function getAirlineName(id, airlines) {
 }
 
 export function getAircraftName(id, aircrafts) {
-  if (!Array.isArray(aircrafts)) return id
+  if (!Array.isArray(aircrafts)) {
+    console.log('❌ Aircrafts array değil:', aircrafts)
+    return id
+  }
   const aircraft = aircrafts.find(a => a.id === id || a.id === String(id) || a.id === Number(id))
+  console.log(`🔍 Aircraft arama - ID: ${id}, Bulunan:`, aircraft)
   return aircraft ? aircraft.name : id
 }
 

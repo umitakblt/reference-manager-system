@@ -101,7 +101,7 @@ export default {
         const formData = new FormData()
         formData.append('file', selectedFile.value)
         
-        const response = await api.post('/flights/bulk-upload', formData, {
+        const response = await api.post('/v1/flights/bulk-upload', formData, {
           headers: {
             'Content-Type': 'multipart/form-data'
           }

@@ -162,6 +162,9 @@
     <!-- Uçak Dialog -->
     <el-dialog v-model="showAircraftDialog" title="Uçak" width="500px">
       <el-form :model="aircraftForm" :rules="aircraftRules" ref="aircraftFormRef" label-width="100px">
+        <el-form-item label="Ad" prop="name">
+          <el-input v-model="aircraftForm.name" placeholder="Uçak adı" />
+        </el-form-item>
         <el-form-item label="Model" prop="model">
           <el-input v-model="aircraftForm.model" placeholder="Uçak modeli" />
         </el-form-item>
@@ -189,6 +192,9 @@
         </el-form-item>
         <el-form-item label="Şehir" prop="city">
           <el-input v-model="stationForm.city" placeholder="Şehir" />
+        </el-form-item>
+        <el-form-item label="Ülke" prop="country">
+          <el-input v-model="stationForm.country" placeholder="Ülke" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -243,19 +249,16 @@ export default {
     
     const saving = ref(false)
     
-    // Dialog states
     const showAirlineDialog = ref(false)
     const showAircraftDialog = ref(false)
     const showStationDialog = ref(false)
     const showFlightTypeDialog = ref(false)
     
-    // Form refs
     const airlineFormRef = ref()
     const aircraftFormRef = ref()
     const stationFormRef = ref()
     const flightTypeFormRef = ref()
     
-    // Forms
     const airlineForm = reactive({
       id: null,
       name: '',
@@ -265,6 +268,7 @@ export default {
     
     const aircraftForm = reactive({
       id: null,
+      name: '',
       model: '',
       manufacturer: '',
       capacity: 100
@@ -274,7 +278,8 @@ export default {
       id: null,
       name: '',
       code: '',
-      city: ''
+      city: '',
+      country: ''
     })
     
     const flightTypeForm = reactive({
@@ -283,7 +288,6 @@ export default {
       description: ''
     })
     
-    // Validation rules
     const airlineRules = {
       name: [{ required: true, message: 'Havayolu adı gerekli', trigger: 'blur' }],
       code: [{ required: true, message: 'Kod gerekli', trigger: 'blur' }],
@@ -291,6 +295,7 @@ export default {
     }
     
     const aircraftRules = {
+      name: [{ required: true, message: 'Uçak adı gerekli', trigger: 'blur' }],
       model: [{ required: true, message: 'Model gerekli', trigger: 'blur' }],
       manufacturer: [{ required: true, message: 'Üretici gerekli', trigger: 'blur' }],
       capacity: [{ required: true, message: 'Kapasite gerekli', trigger: 'blur' }]
@@ -299,7 +304,8 @@ export default {
     const stationRules = {
       name: [{ required: true, message: 'İstasyon adı gerekli', trigger: 'blur' }],
       code: [{ required: true, message: 'Kod gerekli', trigger: 'blur' }],
-      city: [{ required: true, message: 'Şehir gerekli', trigger: 'blur' }]
+      city: [{ required: true, message: 'Şehir gerekli', trigger: 'blur' }],
+      country: [{ required: true, message: 'Ülke gerekli', trigger: 'blur' }]
     }
     
     const flightTypeRules = {
@@ -307,11 +313,10 @@ export default {
       description: [{ required: true, message: 'Açıklama gerekli', trigger: 'blur' }]
     }
     
-    // Load data functions
     const loadAirlines = async () => {
       loading.airlines = true
       try {
-        const response = await api.get('/airlines')
+        const response = await api.get('/v1/airlines')
         airlines.value = response.data
       } catch (error) {
         ElMessage.error('Havayolları yüklenirken hata oluştu')
@@ -323,7 +328,7 @@ export default {
     const loadAircrafts = async () => {
       loading.aircrafts = true
       try {
-        const response = await api.get('/aircrafts')
+        const response = await api.get('/v1/aircrafts')
         aircrafts.value = response.data
       } catch (error) {
         ElMessage.error('Uçaklar yüklenirken hata oluştu')
@@ -335,7 +340,7 @@ export default {
     const loadStations = async () => {
       loading.stations = true
       try {
-        const response = await api.get('/stations')
+        const response = await api.get('/v1/stations')
         stations.value = response.data
       } catch (error) {
         ElMessage.error('İstasyonlar yüklenirken hata oluştu')
@@ -347,7 +352,7 @@ export default {
     const loadFlightTypes = async () => {
       loading.flightTypes = true
       try {
-        const response = await api.get('/flight-types')
+        const response = await api.get('/v1/flight-types')
         flightTypes.value = response.data
       } catch (error) {
         ElMessage.error('Uçuş tipleri yüklenirken hata oluştu')
@@ -356,23 +361,36 @@ export default {
       }
     }
     
-    // Save functions
     const saveAirline = async () => {
       try {
         await airlineFormRef.value.validate()
         saving.value = true
         
         if (airlineForm.id) {
-          await api.put(`/airlines/${airlineForm.id}`, airlineForm)
+          console.log('🔄 Havayolu güncelleniyor:', airlineForm)
+          const response = await api.put(`/v1/airlines/${airlineForm.id}`, airlineForm)
+          console.log('✅ Havayolu güncelleme response:', response.data)
+          
+          // State'i hemen güncelle
+          const airlineIndex = airlines.value.findIndex(a => a.id === airlineForm.id)
+          if (airlineIndex !== -1) {
+            airlines.value[airlineIndex] = { ...airlines.value[airlineIndex], ...response.data }
+            console.log('✅ State güncellendi:', airlines.value[airlineIndex])
+          }
           ElMessage.success('Havayolu güncellendi')
         } else {
-          await api.post('/airlines', airlineForm)
+          console.log('➕ Yeni havayolu ekleniyor:', JSON.stringify(airlineForm, null, 2))
+          const response = await api.post('/v1/airlines', airlineForm)
+          console.log('✅ Havayolu ekleme response:', response.data)
+          
+          // State'e hemen ekle
+          airlines.value.push(response.data)
+          console.log('✅ State\'e eklendi, toplam:', airlines.value.length)
           ElMessage.success('Havayolu eklendi')
         }
         
         showAirlineDialog.value = false
         resetAirlineForm()
-        loadAirlines()
       } catch (error) {
         ElMessage.error('Havayolu kaydedilirken hata oluştu')
       } finally {
@@ -386,17 +404,38 @@ export default {
         saving.value = true
         
         if (aircraftForm.id) {
-          await api.put(`/aircrafts/${aircraftForm.id}`, aircraftForm)
+          console.log('🔄 Uçak güncelleniyor:', JSON.stringify(aircraftForm, null, 2))
+          const response = await api.put(`/v1/aircrafts/${aircraftForm.id}`, aircraftForm)
+          console.log('✅ Uçak güncelleme response:', response.data)
+          
+          // State'i hemen güncelle
+          const aircraftIndex = aircrafts.value.findIndex(a => a.id === aircraftForm.id)
+          if (aircraftIndex !== -1) {
+            aircrafts.value[aircraftIndex] = { ...aircrafts.value[aircraftIndex], ...response.data }
+            console.log('✅ State güncellendi:', aircrafts.value[aircraftIndex])
+          }
           ElMessage.success('Uçak güncellendi')
         } else {
-          await api.post('/aircrafts', aircraftForm)
+          console.log('➕ Yeni uçak ekleniyor:', JSON.stringify(aircraftForm, null, 2))
+          const response = await api.post('/v1/aircrafts', aircraftForm)
+          console.log('✅ Uçak ekleme response:', response.data)
+          
+          // State'e hemen ekle
+          aircrafts.value.push(response.data)
+          console.log('✅ State\'e eklendi, toplam:', aircrafts.value.length)
           ElMessage.success('Uçak eklendi')
         }
         
+        // Modal'ı kapat ve formu sıfırla
         showAircraftDialog.value = false
         resetAircraftForm()
-        loadAircrafts()
+        
+        // Form validasyonunu temizle
+        if (aircraftFormRef.value) {
+          aircraftFormRef.value.clearValidate()
+        }
       } catch (error) {
+        console.error('Uçak kaydetme hatası:', error)
         ElMessage.error('Uçak kaydedilirken hata oluştu')
       } finally {
         saving.value = false
@@ -409,16 +448,30 @@ export default {
         saving.value = true
         
         if (stationForm.id) {
-          await api.put(`/stations/${stationForm.id}`, stationForm)
+          console.log('🔄 İstasyon güncelleniyor:', JSON.stringify(stationForm, null, 2))
+          const response = await api.put(`/v1/stations/${stationForm.id}`, stationForm)
+          console.log('✅ İstasyon güncelleme response:', response.data)
+          
+          // State'i hemen güncelle
+          const stationIndex = stations.value.findIndex(s => s.id === stationForm.id)
+          if (stationIndex !== -1) {
+            stations.value[stationIndex] = { ...stations.value[stationIndex], ...response.data }
+            console.log('✅ State güncellendi:', stations.value[stationIndex])
+          }
           ElMessage.success('İstasyon güncellendi')
         } else {
-          await api.post('/stations', stationForm)
+          console.log('➕ Yeni istasyon ekleniyor:', JSON.stringify(stationForm, null, 2))
+          const response = await api.post('/v1/stations', stationForm)
+          console.log('✅ İstasyon ekleme response:', response.data)
+          
+          // State'e hemen ekle
+          stations.value.push(response.data)
+          console.log('✅ State\'e eklendi, toplam:', stations.value.length)
           ElMessage.success('İstasyon eklendi')
         }
         
         showStationDialog.value = false
         resetStationForm()
-        loadStations()
       } catch (error) {
         ElMessage.error('İstasyon kaydedilirken hata oluştu')
       } finally {
@@ -432,16 +485,30 @@ export default {
         saving.value = true
         
         if (flightTypeForm.id) {
-          await api.put(`/flight-types/${flightTypeForm.id}`, flightTypeForm)
+          console.log('🔄 Uçuş tipi güncelleniyor:', flightTypeForm)
+          const response = await api.put(`/v1/flight-types/${flightTypeForm.id}`, flightTypeForm)
+          console.log('✅ Uçuş tipi güncelleme response:', response.data)
+          
+          // State'i hemen güncelle
+          const flightTypeIndex = flightTypes.value.findIndex(ft => ft.id === flightTypeForm.id)
+          if (flightTypeIndex !== -1) {
+            flightTypes.value[flightTypeIndex] = { ...flightTypes.value[flightTypeIndex], ...response.data }
+            console.log('✅ State güncellendi:', flightTypes.value[flightTypeIndex])
+          }
           ElMessage.success('Uçuş tipi güncellendi')
         } else {
-          await api.post('/flight-types', flightTypeForm)
+          console.log('➕ Yeni uçuş tipi ekleniyor:', flightTypeForm)
+          const response = await api.post('/v1/flight-types', flightTypeForm)
+          console.log('✅ Uçuş tipi ekleme response:', response.data)
+          
+          // State'e hemen ekle
+          flightTypes.value.push(response.data)
+          console.log('✅ State\'e eklendi, toplam:', flightTypes.value.length)
           ElMessage.success('Uçuş tipi eklendi')
         }
         
         showFlightTypeDialog.value = false
         resetFlightTypeForm()
-        loadFlightTypes()
       } catch (error) {
         ElMessage.error('Uçuş tipi kaydedilirken hata oluştu')
       } finally {
@@ -449,7 +516,6 @@ export default {
       }
     }
     
-    // Edit functions
     const editAirline = (airline) => {
       Object.assign(airlineForm, airline)
       showAirlineDialog.value = true
@@ -470,15 +536,18 @@ export default {
       showFlightTypeDialog.value = true
     }
     
-    // Delete functions
     const deleteAirline = async (id) => {
       try {
         await ElMessageBox.confirm('Bu havayolunu silmek istediğinizden emin misiniz?', 'Onay', {
           type: 'warning'
         })
-        await api.delete(`/airlines/${id}`)
+        await api.delete(`/v1/airlines/${id}`)
+        // State'den hemen sil
+        const airlineIndex = airlines.value.findIndex(a => a.id === id)
+        if (airlineIndex !== -1) {
+          airlines.value.splice(airlineIndex, 1)
+        }
         ElMessage.success('Havayolu silindi')
-        loadAirlines()
       } catch (error) {
         if (error !== 'cancel') {
           ElMessage.error('Havayolu silinirken hata oluştu')
@@ -491,9 +560,13 @@ export default {
         await ElMessageBox.confirm('Bu uçağı silmek istediğinizden emin misiniz?', 'Onay', {
           type: 'warning'
         })
-        await api.delete(`/aircrafts/${id}`)
+        await api.delete(`/v1/aircrafts/${id}`)
+        // State'den hemen sil
+        const aircraftIndex = aircrafts.value.findIndex(a => a.id === id)
+        if (aircraftIndex !== -1) {
+          aircrafts.value.splice(aircraftIndex, 1)
+        }
         ElMessage.success('Uçak silindi')
-        loadAircrafts()
       } catch (error) {
         if (error !== 'cancel') {
           ElMessage.error('Uçak silinirken hata oluştu')
@@ -506,9 +579,13 @@ export default {
         await ElMessageBox.confirm('Bu istasyonu silmek istediğinizden emin misiniz?', 'Onay', {
           type: 'warning'
         })
-        await api.delete(`/stations/${id}`)
+        await api.delete(`/v1/stations/${id}`)
+        // State'den hemen sil
+        const stationIndex = stations.value.findIndex(s => s.id === id)
+        if (stationIndex !== -1) {
+          stations.value.splice(stationIndex, 1)
+        }
         ElMessage.success('İstasyon silindi')
-        loadStations()
       } catch (error) {
         if (error !== 'cancel') {
           ElMessage.error('İstasyon silinirken hata oluştu')
@@ -521,9 +598,13 @@ export default {
         await ElMessageBox.confirm('Bu uçuş tipini silmek istediğinizden emin misiniz?', 'Onay', {
           type: 'warning'
         })
-        await api.delete(`/flight-types/${id}`)
+        await api.delete(`/v1/flight-types/${id}`)
+        // State'den hemen sil
+        const flightTypeIndex = flightTypes.value.findIndex(ft => ft.id === id)
+        if (flightTypeIndex !== -1) {
+          flightTypes.value.splice(flightTypeIndex, 1)
+        }
         ElMessage.success('Uçuş tipi silindi')
-        loadFlightTypes()
       } catch (error) {
         if (error !== 'cancel') {
           ElMessage.error('Uçuş tipi silinirken hata oluştu')
@@ -531,7 +612,6 @@ export default {
       }
     }
     
-    // Reset form functions
     const resetAirlineForm = () => {
       airlineForm.id = null
       airlineForm.name = ''
@@ -541,6 +621,7 @@ export default {
     
     const resetAircraftForm = () => {
       aircraftForm.id = null
+      aircraftForm.name = ''
       aircraftForm.model = ''
       aircraftForm.manufacturer = ''
       aircraftForm.capacity = 100
@@ -551,6 +632,7 @@ export default {
       stationForm.name = ''
       stationForm.code = ''
       stationForm.city = ''
+      stationForm.country = ''
     }
     
     const resetFlightTypeForm = () => {

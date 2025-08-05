@@ -24,9 +24,8 @@ public class NativeWebSocketController extends TextWebSocketHandler {
         logger.info("WebSocket bağlantısı kuruldu: {}", session.getId());
         sessions.put(session.getId(), session);
         
-        // Bağlantı kurulduğunda hemen mesaj gönderme, biraz bekle
         try {
-            Thread.sleep(100); // 100ms bekle
+            Thread.sleep(100);
             if (session.isOpen()) {
                 sendMessage(session, "CONNECTION_ESTABLISHED", "WebSocket bağlantısı başarılı");
             }
@@ -70,7 +69,6 @@ public class NativeWebSocketController extends TextWebSocketHandler {
     public void handleTransportError(WebSocketSession session, Throwable exception) throws Exception {
         logger.error("WebSocket transport hatası: {}", exception.getMessage());
         
-        // Broken pipe ve diğer bağlantı hatalarını sessizce handle et
         if (exception instanceof IOException) {
             logger.debug("IO hatası - bağlantı muhtemelen kapatıldı: {}", exception.getMessage());
         } else {
@@ -84,10 +82,8 @@ public class NativeWebSocketController extends TextWebSocketHandler {
         try {
             logger.info("Flight update işleniyor: {}", messageData.getData());
             
-            // Tüm bağlı client'lara broadcast et
             broadcastMessage("FLIGHT_UPDATE", messageData.getData());
             
-            // Gönderen client'a onay gönder
             sendMessage(session, "FLIGHT_UPDATE_CONFIRMED", "Flight update başarıyla işlendi");
             
         } catch (Exception e) {
@@ -112,7 +108,6 @@ public class NativeWebSocketController extends TextWebSocketHandler {
             session.sendMessage(new TextMessage(jsonMessage));
             
         } catch (IOException e) {
-            // Broken pipe ve diğer IO hatalarını sessizce handle et
             if (e.getMessage() != null && e.getMessage().contains("Broken pipe")) {
                 logger.debug("Broken pipe hatası - bağlantı kapatılmış: {}", e.getMessage());
             } else {
@@ -129,7 +124,7 @@ public class NativeWebSocketController extends TextWebSocketHandler {
         logger.info("Data: {}", data);
         logger.info("Session sayısı: {}", sessions.size());
         
-        sessions.values().removeIf(session -> !session.isOpen()); // Kapalı session'ları temizle
+        sessions.values().removeIf(session -> !session.isOpen());
         
         sessions.values().forEach(session -> {
             if (session.isOpen()) {
@@ -149,12 +144,10 @@ public class NativeWebSocketController extends TextWebSocketHandler {
         logger.info("Flight: {}", flight);
         logger.info("Aktif session sayısı: {}", sessions.size());
         
-        // Session'ları listele
         sessions.keySet().forEach(sessionId -> {
             logger.info("Aktif session ID: {}", sessionId);
         });
         
-        // Doğru format: {action: "CREATE", flight: {...}}
         FlightUpdateData flightUpdateData = new FlightUpdateData(action, flight);
         
         logger.info("Flight update data: {}", flightUpdateData);

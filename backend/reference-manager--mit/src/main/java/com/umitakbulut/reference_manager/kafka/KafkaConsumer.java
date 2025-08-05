@@ -68,7 +68,7 @@ public class KafkaConsumer {
     public void consumeUser(String message) {
         try {
             User user = objectMapper.readValue(message, User.class);
-            userService.saveFromKafka(user); // bu metodu UserServiceImpl'e ekle
+            userService.saveFromKafka(user);
             log.info("User mesajı alındı: {}", message);
         } catch (Exception e) {
             log.error("User mesajı işlenirken hata oluştu", e);
@@ -79,7 +79,7 @@ public class KafkaConsumer {
     public void consumeUserRole(String message) {
         try {
             UserRole userRole = objectMapper.readValue(message, UserRole.class);
-            userRoleService.saveFromKafka(userRole); // bu metodu service'e ekle
+            userRoleService.saveFromKafka(userRole);
             log.info("UserRole mesajı alındı: {}", message);
         } catch (Exception e) {
             log.error("UserRole mesajı işlenirken hata oluştu", e);

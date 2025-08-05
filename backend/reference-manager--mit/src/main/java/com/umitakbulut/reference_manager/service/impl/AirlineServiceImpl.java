@@ -20,14 +20,14 @@ public class AirlineServiceImpl implements AirlineService {
 
     private final AirlineRepository airlineRepository;
     private final AirlineMapper airlineMapper;
-    private final KafkaProducer kafkaProducer; // Kafka producer eklendi
+    private final KafkaProducer kafkaProducer;
 
     @Override
     public AirlineResponseDTO save(AirlineRequestDTO requestDTO) {
         Airline airline = airlineMapper.toEntity(requestDTO);
         Airline saved = airlineRepository.save(airline);
 
-        kafkaProducer.sendAirline(saved); // Kafka'ya gönder
+        kafkaProducer.sendAirline(saved);
 
         return airlineMapper.toDto(saved);
     }
@@ -55,7 +55,7 @@ public class AirlineServiceImpl implements AirlineService {
         updated.setId(existing.getId());
         Airline saved = airlineRepository.save(updated);
 
-        kafkaProducer.sendAirline(saved); // Kafka'ya gönder
+        kafkaProducer.sendAirline(saved);
 
         return airlineMapper.toDto(saved);
     }

@@ -389,9 +389,9 @@ export default {
       datasets: [{
         data: [0, 0, 0],
         backgroundColor: [
-          '#10b981', // Yeşil - Zamanında
-          '#f59e0b', // Turuncu - Gecikmeli
-          '#ef4444'  // Kırmızı - İptal
+          '#10b981',
+          '#f59e0b',
+          '#ef4444'
         ],
         borderWidth: 0,
         hoverOffset: 4
@@ -445,7 +445,7 @@ export default {
 
     const loadStats = async () => {
       try {
-        const response = await api.get('/flights')
+        const response = await api.get('/v1/flights')
         const flights = response.data
         
         const onTimeCount = flights.filter(f => f.status === 'ON_TIME').length
@@ -497,7 +497,7 @@ export default {
     const loadRecentFlights = async () => {
       loading.recentFlights = true
       try {
-        const response = await api.get('/flights')
+        const response = await api.get('/v1/flights')
         recentFlights.value = response.data.slice(0, 5)
       } catch (error) {
         console.error('Error loading recent flights:', error)
@@ -508,7 +508,7 @@ export default {
     
     const checkDatabaseStatus = async () => {
       try {
-        await api.get('/test/health')
+        await api.get('/v1/test/health')
         dbStatus.value = true
       } catch (error) {
         dbStatus.value = false

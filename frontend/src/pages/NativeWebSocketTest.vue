@@ -79,13 +79,11 @@ const connect = async () => {
 }
 
 const setupMessageHandlers = () => {
-  // Flight update'leri dinle
   nativeWebSocketService.onFlightUpdate((data) => {
     addMessage(`Flight update: ${JSON.stringify(data)}`)
     addLog(`Flight update alındı: ${JSON.stringify(data)}`)
   })
   
-  // Tüm mesajları dinle
   nativeWebSocketService.onMessage('CONNECTION_ESTABLISHED', (data) => {
     addMessage(`Bağlantı kuruldu: ${data}`)
     addLog('CONNECTION_ESTABLISHED mesajı alındı')
@@ -106,7 +104,6 @@ const setupMessageHandlers = () => {
     addLog(`PONG mesajı alındı: ${data}`)
   })
   
-  // Tüm FLIGHT_UPDATE mesajlarını dinle
   nativeWebSocketService.onMessage('FLIGHT_UPDATE', (data) => {
     addMessage(`FLIGHT_UPDATE: ${JSON.stringify(data)}`)
     addLog(`FLIGHT_UPDATE mesajı alındı: ${JSON.stringify(data)}`)
@@ -141,7 +138,6 @@ const sendFlightUpdate = () => {
   ElMessage.success('Flight update mesajı gönderildi')
 }
 
-// Connection status dinle
 nativeWebSocketService.onConnectionChange((connected) => {
   isConnected.value = connected
   connectionStatus.value = connected ? 'Connected' : 'Disconnected'
@@ -151,7 +147,6 @@ nativeWebSocketService.onConnectionChange((connected) => {
 onMounted(() => {
   addLog('Native WebSocket test sayfası yüklendi')
   
-  // Handler'ları sayfa yüklendiğinde tanımla
   setupMessageHandlers()
 })
 </script>

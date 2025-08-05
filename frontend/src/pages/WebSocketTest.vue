@@ -65,14 +65,12 @@ const connect = async () => {
   try {
     addLog('Native WebSocket bağlantısı başlatılıyor...')
     
-    // Bağlantı durumu dinleyicisi
     nativeWebSocketService.onConnectionChange((connected) => {
       isConnected.value = connected
       connectionStatus.value = connected ? 'Connected' : 'Disconnected'
       addLog(`Bağlantı durumu değişti: ${connected ? 'Bağlı' : 'Bağlı değil'}`)
     })
     
-    // Mesaj dinleyicileri
     nativeWebSocketService.onMessage('CONNECTION_ESTABLISHED', (message) => {
       addMessage(`Bağlantı kuruldu: ${JSON.stringify(message.data)}`)
     })
@@ -93,7 +91,6 @@ const connect = async () => {
       addMessage(`Hata: ${JSON.stringify(message.data)}`)
     })
     
-    // Genel mesaj dinleyicisi
     nativeWebSocketService.onMessage('*', (message) => {
       addMessage(`Genel mesaj [${message.type}]: ${JSON.stringify(message.data)}`)
     })

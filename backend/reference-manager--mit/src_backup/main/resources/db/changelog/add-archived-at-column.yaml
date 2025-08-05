@@ -1,0 +1,20 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-archived-at-column-001
+      author: umit
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            columnExists:
+              tableName: flight_archive
+              columnName: archived_at
+      changes:
+        - addColumn:
+            tableName: flight_archive
+            columns:
+              - column:
+                  name: archived_at
+                  type: datetime
+                  defaultValueDate: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false 

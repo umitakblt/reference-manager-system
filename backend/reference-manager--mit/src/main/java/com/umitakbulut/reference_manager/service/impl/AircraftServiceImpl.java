@@ -20,14 +20,14 @@ public class AircraftServiceImpl implements AircraftService {
 
     private final AircraftRepository aircraftRepository;
     private final AircraftMapper aircraftMapper;
-    private final KafkaProducer kafkaProducer;  // KafkaProducer eklendi
+    private final KafkaProducer kafkaProducer;
 
     @Override
     public AircraftResponseDTO save(AircraftRequestDTO requestDTO) {
         Aircraft aircraft = aircraftMapper.toEntity(requestDTO);
         Aircraft saved = aircraftRepository.save(aircraft);
 
-        kafkaProducer.sendAircraft(saved);  // Kafka'ya mesaj gönder
+        kafkaProducer.sendAircraft(saved);
 
         return aircraftMapper.toDto(saved);
     }
@@ -56,7 +56,7 @@ public class AircraftServiceImpl implements AircraftService {
 
         Aircraft saved = aircraftRepository.save(updated);
 
-        kafkaProducer.sendAircraft(saved);  // Güncelleme sonrası Kafka'ya mesaj gönder
+        kafkaProducer.sendAircraft(saved);
 
         return aircraftMapper.toDto(saved);
     }

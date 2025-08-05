@@ -70,18 +70,54 @@
 
     <div v-if="flights.length && !loading" class="flights-section">
       <div class="section-header">
-        <h2>Uçuş Detayları</h2>
-        <div class="filters">
-          <el-input
-            v-model="searchQuery"
-            placeholder="Uçuş ara..."
-            class="search-input"
-            clearable
-          >
-            <template #prefix>
-              <el-icon><Search /></el-icon>
-            </template>
-          </el-input>
+        <div class="header-left">
+          <h2>Uçuş Detayları</h2>
+          <div class="table-info">
+            <span class="info-text">{{ filteredFlights.length }} uçuş listeleniyor</span>
+          </div>
+        </div>
+        
+        <div class="header-controls">
+          <div class="controls-row">
+            <el-input
+              v-model="searchQuery"
+              placeholder="Uçuş ara..."
+              class="search-input"
+              clearable
+            >
+              <template #prefix>
+                <el-icon><Search /></el-icon>
+              </template>
+            </el-input>
+            
+            <el-select 
+              v-model="sortBy" 
+              placeholder="Sıralama kriteri"
+              class="sort-select"
+              @change="handleSortChange"
+            >
+              <el-option label="Uçuş No" value="flightNumber" />
+              <el-option label="Kalkış Zamanı" value="scheduledDeparture" />
+              <el-option label="Varış Zamanı" value="scheduledArrival" />
+              <el-option label="Durum" value="status" />
+              <el-option label="Havayolu" value="airlineId" />
+              <el-option label="Kalkış İstasyonu" value="originStationId" />
+              <el-option label="Varış İstasyonu" value="destinationStationId" />
+            </el-select>
+            
+            <el-button 
+              @click="toggleSortOrder" 
+              :type="sortOrder === 'asc' ? 'primary' : 'default'"
+              class="sort-btn"
+              size="small"
+            >
+              <el-icon>
+                <ArrowUp v-if="sortOrder === 'asc'" />
+                <ArrowDown v-else />
+              </el-icon>
+              {{ sortOrder === 'asc' ? 'Artan' : 'Azalan' }}
+            </el-button>
+          </div>
         </div>
       </div>
 
@@ -98,23 +134,17 @@
           class="flight-table"
           :row-class-name="getRowClassName"
           @row-click="viewFlightDetails"
+          @sort-change="handleTableSort"
         >
-          <el-table-column prop="flightNumber" label="Uçuş No" width="280" fixed="left">
+          <el-table-column prop="flightNumber" label="Uçuş No" width="280" fixed="left" sortable="custom">
             <template #default="scope">
               <div class="flight-number-cell">
                 <span class="flight-code">{{ scope.row.flightNumber }}</span>
-                <el-tag 
-                  :type="getStatusType(scope.row.status)"
-                  class="status-tag"
-                  size="small"
-                >
-                  {{ getStatusText(scope.row.status) }}
-                </el-tag>
               </div>
             </template>
           </el-table-column>
 
-          <el-table-column label="Kalkış İstasyonu" width="260">
+          <el-table-column prop="originStationId" label="Kalkış İstasyonu" width="260" sortable="custom">
             <template #default="scope">
               <div class="station-cell">
                 <div class="station-code">{{ getStationCode(scope.row.originStationId) }}</div>
@@ -123,7 +153,7 @@
             </template>
           </el-table-column>
 
-          <el-table-column label="Varış İstasyonu" width="260">
+          <el-table-column prop="destinationStationId" label="Varış İstasyonu" width="260" sortable="custom">
             <template #default="scope">
               <div class="station-cell">
                 <div class="station-code">{{ getStationCode(scope.row.destinationStationId) }}</div>
@@ -132,7 +162,7 @@
             </template>
           </el-table-column>
 
-          <el-table-column label="Havayolu" width="260">
+          <el-table-column prop="airlineId" label="Havayolu" width="260" sortable="custom">
             <template #default="scope">
               <div class="airline-cell">
                 <el-icon><Location /></el-icon>
@@ -141,16 +171,20 @@
             </template>
           </el-table-column>
 
-          <el-table-column label="Uçak" width="260">
+          <el-table-column prop="aircraftId" label="Uçak" width="260" sortable="custom">
             <template #default="scope">
               <div class="aircraft-cell">
                 <el-icon><Document /></el-icon>
-                <span>{{ getAircraftName(scope.row.aircraftId, aircrafts) }}</span>
+                <div class="aircraft-info">
+                  <div class="aircraft-name">{{ getAircraftName(scope.row.aircraftId, aircrafts) }}</div>
+                  <div class="aircraft-details">{{ getAircraftDetails(scope.row.aircraftId, aircrafts) }}</div>
+                  <div class="aircraft-debug" style="font-size: 10px; color: #999;">ID: {{ scope.row.aircraftId }}</div>
+                </div>
               </div>
             </template>
           </el-table-column>
 
-          <el-table-column label="Kalkış" width="260">
+          <el-table-column prop="scheduledDeparture" label="Kalkış" width="260" sortable="custom">
             <template #default="scope">
               <div class="time-cell">
                 <div class="time">{{ formatTime(scope.row.scheduledDeparture) }}</div>
@@ -159,11 +193,25 @@
             </template>
           </el-table-column>
 
-          <el-table-column label="Varış" width="260">
+          <el-table-column prop="scheduledArrival" label="Varış" width="260" sortable="custom">
             <template #default="scope">
               <div class="time-cell">
                 <div class="time">{{ formatTime(scope.row.scheduledArrival) }}</div>
                 <div class="date">{{ formatDate(scope.row.scheduledArrival) }}</div>
+              </div>
+            </template>
+          </el-table-column>
+
+          <el-table-column prop="status" label="Durum" width="200" sortable="custom">
+            <template #default="scope">
+              <div class="status-cell">
+                <el-tag 
+                  :type="getStatusType(scope.row.status)"
+                  class="status-tag"
+                  size="small"
+                >
+                  {{ getStatusText(scope.row.status) }}
+                </el-tag>
               </div>
             </template>
           </el-table-column>
@@ -221,6 +269,8 @@ import {
   Loading,
   Search,
   ArrowRight,
+  ArrowUp,
+  ArrowDown,
   Document,
   Calendar,
   Edit,
@@ -236,16 +286,17 @@ const airlines = ref([])
 const aircrafts = ref([])
 const stations = ref([])
 const searchQuery = ref('')
+const sortBy = ref('scheduledDeparture')
+const sortOrder = ref('asc')
 const websocketSubscription = ref(null)
 
 const fetchFlights = async () => {
   loading.value = true
   error.value = ''
   try {
-    const res = await api.get('/flights')
+    const res = await api.get('/v1/flights')
     flights.value = res.data
     
-    // Debug: Tarih sorunlarını kontrol et
     flights.value.forEach(flight => {
       if (!flight.scheduledDeparture || !flight.scheduledArrival) {
         console.warn('Eksik tarih verisi:', flight)
@@ -261,13 +312,18 @@ const fetchFlights = async () => {
 const loadReferenceData = async () => {
   try {
     const [airlinesRes, aircraftsRes, stationsRes] = await Promise.all([
-      api.get('/airlines'),
-      api.get('/aircrafts'),
-      api.get('/stations')
+      api.get('/v1/airlines'),
+      api.get('/v1/aircrafts'),
+      api.get('/v1/stations')
     ])
     airlines.value = airlinesRes.data
     aircrafts.value = aircraftsRes.data
     stations.value = stationsRes.data
+    
+    // Debug log'ları
+    console.log('📊 Airlines:', airlines.value)
+    console.log('✈️ Aircrafts:', aircrafts.value)
+    console.log('🏢 Stations:', stations.value)
   } catch (err) {
     console.error('Referans veriler yüklenirken hata:', err)
   }
@@ -302,14 +358,12 @@ const deleteFlight = async (flightId) => {
       }
     )
     
-    // Silinecek uçuşun bilgilerini al
     const flightToDelete = flights.value.find(f => f.id === flightId)
     
-    await api.delete(`/flights/${flightId}`)
+            await api.delete(`/v1/flights/${flightId}`)
     await fetchFlights()
     ElMessage.success('Uçuş başarıyla silindi')
     
-    // WebSocket ile gerçek zamanlı güncelleme gönder
     if (flightToDelete) {
       try {
         console.log('📤 WebSocket ile uçuş silme güncellemesi gönderiliyor...')
@@ -317,7 +371,6 @@ const deleteFlight = async (flightId) => {
         console.log('✅ WebSocket mesajı gönderildi')
       } catch (wsError) {
         console.error('❌ WebSocket mesajı gönderilemedi:', wsError)
-        // WebSocket hatası olsa bile silme işlemi başarılı
       }
     }
   } catch (err) {
@@ -356,11 +409,22 @@ const getStationCode = (stationId) => {
   return station ? station.code : stationId
 }
 
+const getAircraftDetails = (aircraftId, aircrafts) => {
+  if (!Array.isArray(aircrafts)) return ''
+  const aircraft = aircrafts.find(a => a.id === aircraftId || a.id === String(aircraftId) || a.id === Number(aircraftId))
+  if (!aircraft) return ''
+  
+  const details = []
+  if (aircraft.model) details.push(aircraft.model)
+  if (aircraft.capacity) details.push(`${aircraft.capacity} koltuk`)
+  
+  return details.join(' • ')
+}
+
 const formatTime = (dateString) => {
   if (!dateString) return '--:--'
   
   try {
-    // Backend'den gelen format: "2024-01-15 10:30:00"
     const date = new Date(dateString)
     if (isNaN(date.getTime())) {
       console.warn('Geçersiz tarih formatı:', dateString)
@@ -381,7 +445,6 @@ const formatDate = (dateString) => {
   if (!dateString) return '--/--/----'
   
   try {
-    // Backend'den gelen format: "2024-01-15 10:30:00"
     const date = new Date(dateString)
     if (isNaN(date.getTime())) {
       console.warn('Geçersiz tarih formatı:', dateString)
@@ -399,15 +462,92 @@ const formatDate = (dateString) => {
   }
 }
 
-const filteredFlights = computed(() => {
-  if (!searchQuery.value) return flights.value
+const handleSortChange = () => {
+  sortOrder.value = 'asc'
+}
+
+const toggleSortOrder = () => {
+  sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
+}
+
+const handleTableSort = ({ column, prop, order }) => {
+  if (prop) {
+    sortBy.value = prop
+    sortOrder.value = order === 'ascending' ? 'asc' : 'desc'
+  }
+}
+
+const sortFlights = (flightsToSort) => {
+  if (!sortBy.value) return flightsToSort
   
-  return flights.value.filter(flight => 
-    flight.flightNumber.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-    getAirlineName(flight.airlineId, airlines).toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-    getStationName(flight.originStationId, stations).toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-    getStationName(flight.destinationStationId, stations).toLowerCase().includes(searchQuery.value.toLowerCase())
-  )
+  return flightsToSort.sort((a, b) => {
+    let aValue, bValue
+    
+    switch (sortBy.value) {
+      case 'flightNumber':
+        aValue = a.flightNumber || ''
+        bValue = b.flightNumber || ''
+        break
+      case 'scheduledDeparture':
+        aValue = new Date(a.scheduledDeparture || 0)
+        bValue = new Date(b.scheduledDeparture || 0)
+        break
+      case 'scheduledArrival':
+        aValue = new Date(a.scheduledArrival || 0)
+        bValue = new Date(b.scheduledArrival || 0)
+        break
+      case 'status':
+        aValue = getStatusText(a.status) || ''
+        bValue = getStatusText(b.status) || ''
+        break
+      case 'airlineId':
+        aValue = getAirlineName(a.airlineId, airlines) || ''
+        bValue = getAirlineName(b.airlineId, airlines) || ''
+        break
+      case 'originStationId':
+        aValue = getStationName(a.originStationId, stations) || ''
+        bValue = getStationName(b.originStationId, stations) || ''
+        break
+      case 'destinationStationId':
+        aValue = getStationName(a.destinationStationId, stations) || ''
+        bValue = getStationName(b.destinationStationId, stations) || ''
+        break
+      default:
+        aValue = a[sortBy.value] || ''
+        bValue = b[sortBy.value] || ''
+    }
+    
+    if (typeof aValue === 'string' && typeof bValue === 'string') {
+      aValue = aValue.toLowerCase()
+      bValue = bValue.toLowerCase()
+    }
+    
+    if (aValue instanceof Date && bValue instanceof Date) {
+      aValue = aValue.getTime()
+      bValue = bValue.getTime()
+    }
+    
+    if (sortOrder.value === 'asc') {
+      return aValue > bValue ? 1 : aValue < bValue ? -1 : 0
+    } else {
+      return aValue < bValue ? 1 : aValue > bValue ? -1 : 0
+    }
+  })
+}
+
+const filteredFlights = computed(() => {
+  let filtered = flights.value
+  
+  if (searchQuery.value) {
+    filtered = filtered.filter(flight => 
+      flight.flightNumber.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+      getAirlineName(flight.airlineId, airlines).toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+      getStationName(flight.originStationId, stations).toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+      getStationName(flight.destinationStationId, stations).toLowerCase().includes(searchQuery.value.toLowerCase())
+    )
+  }
+  
+  return sortFlights(filtered)
 })
 
 const activeFlights = computed(() => {
@@ -418,10 +558,8 @@ const completedFlights = computed(() => {
   return flights.value.filter(f => f.status === 'COMPLETED').length
 })
 
-// Sidebar durumunu inject et
 const sidebarCollapsed = inject('sidebarCollapsed', ref(false))
 
-// Tablo genişliğini sidebar durumuna göre ayarla
 const tableWidth = computed(() => {
   return sidebarCollapsed.value ? '100vw' : 'calc(100vw - 280px)'
 })
@@ -433,21 +571,17 @@ const getRowClassName = ({ row }) => {
   return ''
 }
 
-// Periyodik bağlantı kontrolü için interval ID'si
 let connectionCheckInterval = null
 
 onMounted(async () => {
   await loadReferenceData()
   await fetchFlights()
 
-  // WebSocket flight update'lerini dinle (bağlantı zaten global olarak kuruldu)
   console.log('🔄 FlightList sayfasında WebSocket dinleyicileri ekleniyor...')
   
-  // FLIGHT_UPDATE mesajlarını dinle
   nativeWebSocketService.onMessage('FLIGHT_UPDATE', (data) => {
     console.log('📨 FLIGHT_UPDATE mesajı alındı:', data)
     
-    // Test mesajlarını filtrele (TK123 gibi sabit test uçuşları)
     if (data && data.flight && data.flight.flightNumber === 'TK123') {
       console.log('🚫 Test mesajı filtrelendi:', data.flight.flightNumber)
       return
@@ -456,7 +590,6 @@ onMounted(async () => {
     handleFlightUpdate(data)
   })
   
-  // Native WebSocket bağlantı durumu değişikliklerini dinle
   nativeWebSocketService.onConnectionChange((connected) => {
     if (connected) {
       console.log('✅ FlightList sayfasında WebSocket bağlantısı aktif')
@@ -467,47 +600,38 @@ onMounted(async () => {
     }
   })
   
-  // Bağlantı istatistiklerini log'la
   const stats = nativeWebSocketService.getStats()
   console.log('📊 WebSocket istatistikleri:', stats)
   
-  // Periyodik bağlantı kontrolü
   connectionCheckInterval = setInterval(() => {
     if (!nativeWebSocketService.isConnected() && !nativeWebSocketService.isConnecting) {
       console.log('🔍 Periyodik kontrol - WebSocket yeniden bağlanıyor...')
       nativeWebSocketService.connect().catch(console.error)
     }
-  }, 30000) // 30 saniyede bir kontrol
+  }, 30000)
 })
 
-// Component unmount olduğunda interval'i temizle ve WebSocket temizle
 onUnmounted(() => {
   if (connectionCheckInterval) {
     clearInterval(connectionCheckInterval)
   }
   console.log('🚪 FlightList sayfası kapatılıyor - WebSocket handler\'ları temizleniyor')
-  // WebSocket bağlantısını tamamen kapatma, sadece handler'ları temizle
   nativeWebSocketService.offMessage('FLIGHT_UPDATE')
   console.log('✅ FlightList sayfası WebSocket temizlendi')
 })
 
-// WebSocket mesajlarını işle
 const handleFlightUpdate = (message) => {
   console.log('🔍 Flight update işleniyor:', message)
   
   try {
-    // Backend'den gelen mesaj formatını kontrol et
     if (message && typeof message === 'object') {
       let action, flight
       
-      // Backend'den gelen mesaj formatı: {type: "FLIGHT_UPDATE", data: {action: "CREATE", flight: {...}}}
       if (message.data && message.data.action && message.data.flight) {
-        // Format: {data: {action: "CREATE", flight: {...}}}
         action = message.data.action
         flight = message.data.flight
         console.log('📨 Backend mesaj formatı tespit edildi')
       } else if (message.action && message.flight) {
-        // Format: {action: "CREATE", flight: {...}} (test mesajları için)
         action = message.action
         flight = message.flight
         console.log('📨 Test mesaj formatı tespit edildi')
@@ -516,7 +640,6 @@ const handleFlightUpdate = (message) => {
         return
       }
       
-      // Duplicate kontrolü - aynı uçuş zaten varsa işleme
       if (action === 'CREATE') {
         const existingFlight = flights.value.find(f => f.id === flight.id)
         if (existingFlight) {
@@ -530,19 +653,15 @@ const handleFlightUpdate = (message) => {
       
       switch (action) {
         case 'CREATE':
-          // Yeni uçuş eklendi
           console.log('➕ CREATE işlemi - Yeni uçuş ekleniyor')
           
-          // Doğru sıraya ekle (scheduledDeparture'a göre)
           const insertIndex = flights.value.findIndex(f => 
             new Date(f.scheduledDeparture) > new Date(flight.scheduledDeparture)
           )
           
           if (insertIndex === -1) {
-            // En sona ekle
             flights.value.push(flight)
           } else {
-            // Doğru pozisyona ekle
             flights.value.splice(insertIndex, 0, flight)
           }
           
@@ -550,7 +669,6 @@ const handleFlightUpdate = (message) => {
           break
           
         case 'UPDATE':
-          // Uçuş güncellendi
           console.log('🔄 UPDATE işlemi - Uçuş güncelleniyor')
           const updateIndex = flights.value.findIndex(f => f.id === flight.id)
           if (updateIndex !== -1) {
@@ -562,7 +680,6 @@ const handleFlightUpdate = (message) => {
           break
           
         case 'DELETE':
-          // Uçuş silindi
           console.log('🗑️ DELETE işlemi - Uçuş siliniyor')
           const deleteIndex = flights.value.findIndex(f => f.id === flight.id)
           if (deleteIndex !== -1) {
@@ -756,24 +873,73 @@ const handleFlightUpdate = (message) => {
 .section-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 20px;
+  gap: 20px;
+}
+
+.header-left {
+  flex: 1;
 }
 
 .section-header h2 {
   font-size: 24px;
   font-weight: 600;
   color: #1e293b;
-  margin: 0;
+  margin: 0 0 8px 0;
+}
+
+.table-info {
+  margin-top: 4px;
+}
+
+.info-text {
+  font-size: 14px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.header-controls {
+  display: flex;
+  align-items: center;
+}
+
+.controls-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .search-input {
-  width: 300px;
+  width: 250px;
 }
 
 .search-input :deep(.el-input__wrapper) {
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.sort-select {
+  width: 180px;
+}
+
+.sort-select :deep(.el-input__wrapper) {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.sort-btn {
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-weight: 600;
+  font-size: 13px;
+  transition: all 0.3s ease;
+  height: 40px;
+}
+
+.sort-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
 }
 
 .table-container {
@@ -875,7 +1041,6 @@ const handleFlightUpdate = (message) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 20px;
   min-width: 240px;
   padding: 18px 0;
 }
@@ -948,14 +1113,14 @@ const handleFlightUpdate = (message) => {
   font-size: 18px;
   font-weight: 700;
   color: #1e293b;
-  margin-bottom: 4px;
   line-height: 1.2;
 }
 
 .date {
-  font-size: 12px;
+  font-size: 13px;
   color: #64748b;
   line-height: 1.2;
+  font-weight: 500;
 }
 
 /* Placeholder styling for invalid dates */
@@ -1027,11 +1192,26 @@ const handleFlightUpdate = (message) => {
   
   .section-header {
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
     align-items: flex-start;
   }
   
+  .header-controls {
+    width: 100%;
+    align-items: stretch;
+  }
+  
+  .controls-row {
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+  
   .search-input {
+    width: 100%;
+  }
+  
+  .sort-select {
     width: 100%;
   }
   
@@ -1064,6 +1244,14 @@ const handleFlightUpdate = (message) => {
   
   .station-code {
     font-size: 14px;
+  }
+  
+  .aircraft-name {
+    font-size: 12px;
+  }
+  
+  .aircraft-details {
+    font-size: 10px;
   }
   
   .time {
@@ -1116,14 +1304,15 @@ const handleFlightUpdate = (message) => {
   font-weight: 600;
   padding: 4px 8px;
   font-size: 11px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* Cell content styling */
 .flight-number-cell {
   display: flex;
   align-items: center;
-  gap: 12px;
-  font-weight: 600;
+  justify-content: center;
   min-width: 140px;
   padding: 8px 0;
 }
@@ -1133,6 +1322,13 @@ const handleFlightUpdate = (message) => {
   font-weight: 700;
   color: #6366f1;
   white-space: nowrap;
+}
+
+.status-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 0;
 }
 
 .status-tag {
@@ -1148,40 +1344,77 @@ const handleFlightUpdate = (message) => {
   text-align: center;
   padding: 12px 0;
   min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
 }
 
 .station-code {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
   color: #1e293b;
   display: block;
-  margin-bottom: 4px;
+  line-height: 1.2;
 }
 
 .station-name {
-  font-size: 12px;
+  font-size: 13px;
   color: #64748b;
   display: block;
+  line-height: 1.2;
+  font-weight: 500;
 }
 
 .airline-cell,
 .aircraft-cell {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   font-size: 14px;
   color: #64748b;
+  padding: 12px 0;
+  min-width: 220px;
+}
+
+.aircraft-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.aircraft-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+  line-height: 1.2;
+}
+
+.aircraft-details {
+  font-size: 11px;
+  color: #64748b;
+  line-height: 1.2;
+  text-align: center;
 }
 
 .time-cell {
   text-align: center;
-  padding: 4px 0;
+  padding: 12px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 220px;
 }
 
 .actions-cell {
   display: flex;
   gap: 8px;
-  justify-content: flex-end;
+  justify-content: center;
   padding: 4px 0;
 }
 </style> 

@@ -36,13 +36,14 @@
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="Uçak" prop="aircraftId">
-              <el-select v-model="flightForm.aircraftId" placeholder="Uçak seçin" style="width: 100%">
+              <el-select v-model="flightForm.aircraftId" placeholder="Uçak seçin" style="width: 100%" :loading="!aircrafts.length">
                 <el-option 
                   v-for="aircraft in aircrafts" 
                   :key="aircraft.id" 
-                  :label="`${aircraft.name} - ${aircraft.model} (${aircraft.capacity} koltuk)`" 
+                  :label="`${aircraft.name || 'İsimsiz'} - ${aircraft.model || 'Model yok'} (${aircraft.capacity || 0} koltuk)`" 
                   :value="aircraft.id" 
                 />
+                <el-option v-if="!aircrafts.length" label="Uçak verisi yükleniyor..." value="" disabled />
               </el-select>
             </el-form-item>
           </el-col>
@@ -112,12 +113,7 @@
                 style="width: 100%"
                 format="YYYY-MM-DD HH:mm:ss"
                 value-format="YYYY-MM-DD HH:mm:ss"
-                :disabled-date="(time) => {
-                  if (flightForm.scheduledDeparture) {
-                    return time.getTime() <= new Date(flightForm.scheduledDeparture).getTime()
-                  }
-                  return false
-                }"
+                :disabled-date="disabledArrivalDate"
               />
             </el-form-item>
           </el-col>
@@ -142,10 +138,10 @@
         </el-row>
         
         <el-form-item>
-          <el-button type="primary" @click="handleSubmit" :loading="loading">
-            Uçuş Oluştur
+          <el-button type="primary" @click="handleSubmit" :loading="loading" :disabled="loading">
+            {{ loading ? 'Oluşturuluyor...' : 'Uçuş Oluştur' }}
           </el-button>
-          <el-button @click="$router.push('/flights')">
+          <el-button @click="$router.push('/flights')" :disabled="loading">
             İptal
           </el-button>
         </el-form-item>
@@ -232,16 +228,22 @@ export default {
     const loadReferenceData = async () => {
       try {
         const [airlinesRes, aircraftsRes, stationsRes, flightTypesRes] = await Promise.all([
-          api.get('/airlines'),
-          api.get('/aircrafts'),
-          api.get('/stations'),
-          api.get('/flight-types')
+          api.get('/v1/airlines'),
+          api.get('/v1/aircrafts'),
+          api.get('/v1/stations'),
+          api.get('/v1/flight-types')
         ])
         
         airlines.value = airlinesRes.data
         aircrafts.value = aircraftsRes.data
         stations.value = stationsRes.data
         flightTypes.value = flightTypesRes.data
+        
+        console.log('📊 Yüklenen veriler:')
+        console.log('Uçaklar:', aircrafts.value)
+        console.log('Havayolları:', airlines.value)
+        console.log('İstasyonlar:', stations.value)
+        console.log('Uçuş tipleri:', flightTypes.value)
       } catch (error) {
         ElMessage.error('Referans veriler yüklenirken hata oluştu')
         console.error('Error loading reference data:', error)
@@ -250,44 +252,76 @@ export default {
     
     const handleSubmit = async () => {
       try {
+        console.log('🔍 Form validasyonu başlıyor...')
         await flightFormRef.value.validate()
-        loading.value = true
+        console.log('✅ Form validasyonu başarılı')
         
-        const response = await api.post('/flights', flightForm)
+        loading.value = true
+        console.log('🔄 Loading başlatıldı')
+        
+        console.log('📤 Uçuş oluşturuluyor:', JSON.stringify(flightForm, null, 2))
+        
+        const response = await api.post('/v1/flights', flightForm)
+        console.log('📥 Backend response status:', response.status)
+        console.log('📥 Backend response data:', response.data)
+        
         const createdFlight = response.data
+        console.log('✅ Uçuş oluşturuldu:', createdFlight)
         
         ElMessage.success('Uçuş başarıyla oluşturuldu')
         
-        // WebSocket ile gerçek zamanlı güncelleme gönder
         try {
           console.log('📤 WebSocket ile uçuş güncellemesi gönderiliyor...')
           nativeWebSocketService.sendFlightUpdate('CREATE', createdFlight)
           console.log('✅ WebSocket mesajı gönderildi')
         } catch (wsError) {
           console.error('❌ WebSocket mesajı gönderilemedi:', wsError)
-          // WebSocket hatası olsa bile uçuş oluşturma işlemi başarılı
         }
         
-        router.push('/flights')
+        console.log('🔄 Loading false yapılıyor...')
+        loading.value = false
+        console.log('✅ Loading false yapıldı')
+        
+        console.log('🔄 Yönlendirme başlatılıyor...')
+        setTimeout(() => {
+          console.log('🔄 Router.push çalıştırılıyor...')
+          router.push('/flights')
+        }, 500)
+        
       } catch (error) {
+        console.error('❌ Uçuş oluşturma hatası:', error)
+        console.error('❌ Error response:', error.response)
+        console.error('❌ Error message:', error.message)
+        
         if (error.response?.status === 400) {
           ElMessage.error('Geçersiz veri formatı')
+        } else if (error.response?.status === 500) {
+          ElMessage.error('Sunucu hatası oluştu')
         } else {
           ElMessage.error('Uçuş oluşturulurken hata oluştu')
-          console.error('Error creating flight:', error)
         }
-      } finally {
+        
+        console.log('🔄 Loading false yapılıyor (hata durumunda)...')
         loading.value = false
+        console.log('✅ Loading false yapıldı (hata durumunda)')
       }
     }
     
-    // Kalkış zamanı değiştiğinde varış zamanını kontrol et
+    const disabledArrivalDate = (time) => {
+      if (flightForm.scheduledDeparture) {
+        const departure = new Date(flightForm.scheduledDeparture)
+        return time.getTime() < departure.getTime() - (24 * 60 * 60 * 1000)
+      }
+      return false
+    }
+
+
+
     watch(() => flightForm.scheduledDeparture, (newDeparture) => {
       if (newDeparture && flightForm.scheduledArrival) {
         const departure = new Date(newDeparture)
         const arrival = new Date(flightForm.scheduledArrival)
         if (arrival <= departure) {
-          // Varış zamanını kalkış zamanından 2 saat sonrasına ayarla
           const newArrival = new Date(departure.getTime() + 2 * 60 * 60 * 1000)
           flightForm.scheduledArrival = newArrival.toISOString().slice(0, 19).replace('T', ' ')
         }
@@ -307,7 +341,8 @@ export default {
       aircrafts,
       stations,
       flightTypes,
-      handleSubmit
+      handleSubmit,
+      disabledArrivalDate
     }
   }
 }

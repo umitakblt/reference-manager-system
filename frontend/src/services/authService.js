@@ -2,19 +2,16 @@ import apiClient from './api';
 
 export const login = async (credentials) => {
   try {
-    const response = await apiClient.post('/auth/authenticate', credentials);
+    const response = await apiClient.post('/v1/auth/authenticate', credentials);
     
-    // On successful login, store token and user info
     if (response.data && response.data.token) {
       sessionStorage.setItem('jwt', response.data.token);
       sessionStorage.setItem('username', response.data.username);
       sessionStorage.setItem('email', response.data.email);
       
-      // Kullanıcı rollerini de kaydet
       if (response.data.roles) {
         console.log('Backend\'den gelen roller:', response.data.roles);
         
-        // Test için ümit kullanıcısının rollerini manuel olarak değiştir
         let roles = response.data.roles;
         if (response.data.username === 'umit') {
           roles = ['USER'];
@@ -24,7 +21,6 @@ export const login = async (credentials) => {
         sessionStorage.setItem('userRoles', JSON.stringify(roles));
       }
       
-      // Kullanıcı ID'sini kaydet
       if (response.data.userId) {
         sessionStorage.setItem('userId', response.data.userId);
       }
@@ -41,7 +37,7 @@ export const login = async (credentials) => {
 
 export const register = async (userData) => {
   try {
-    const response = await apiClient.post('/auth/register', userData);
+    const response = await apiClient.post('/v1/auth/register', userData);
     
     if (response.data && response.data.token) {
       sessionStorage.setItem('jwt', response.data.token);
@@ -66,17 +62,14 @@ export const register = async (userData) => {
 
 export const logout = () => {
   try {
-    // Tüm session storage'ı temizle
     sessionStorage.clear()
     
-    // Local storage'dan da JWT'yi temizle (eğer varsa)
     localStorage.removeItem('jwt')
     localStorage.removeItem('username')
     localStorage.removeItem('email')
     localStorage.removeItem('userRoles')
     localStorage.removeItem('userId')
     
-    // Axios interceptor'ları temizle
     if (apiClient && apiClient.defaults && apiClient.defaults.headers) {
       delete apiClient.defaults.headers.common['Authorization']
     }
@@ -113,7 +106,6 @@ export function isAuthenticated() {
   return !!getToken();
 }
 
-// Rol tabanlı yetki kontrolü fonksiyonları
 export function hasRole(role) {
   const userRoles = getUserRoles();
   return userRoles.includes(role);
@@ -137,14 +129,13 @@ export function isUser() {
   return hasRole('USER');
 }
 
-// Sayfa erişim yetkileri
 export const PAGE_PERMISSIONS = {
   'dashboard': ['ADMIN', 'USER'],
   'flights': ['ADMIN', 'USER'],
   'add-flight': ['ADMIN'],
   'create-flight': ['ADMIN'],
   'edit-flight': ['ADMIN'],
-  'flight-archive': ['ADMIN'], // USER kaldırıldı
+  'flight-archive': ['ADMIN'],
   'bulk-upload': ['ADMIN'],
   'reference-data': ['ADMIN'],
   'user-management': ['ADMIN'],
@@ -153,7 +144,6 @@ export const PAGE_PERMISSIONS = {
 };
 
 export function canAccessPage(pageName) {
-  // Kullanıcı giriş yapmamışsa erişim yok
   if (!isAuthenticated()) {
     return false;
   }
@@ -162,22 +152,17 @@ export function canAccessPage(pageName) {
   const requiredRoles = PAGE_PERMISSIONS[pageName] || [];
   
   if (requiredRoles.length === 0) {
-    return true; // Yetki belirtilmemişse erişime izin ver
+    return true;
   }
   
-  // Rol eşleştirmesi - backend'den gelen roller ile frontend'deki roller arasında
   const hasAccess = requiredRoles.some(requiredRole => {
-    // Backend'den gelen roller ile frontend'deki roller arasında eşleştirme
     return userRoles.some(userRole => {
-      // ADMIN rolü için eşleştirme
       if (requiredRole === 'ADMIN' && (userRole === 'ADMIN' || userRole === 'ROLE_ADMIN')) {
         return true;
       }
-      // USER rolü için eşleştirme
       if (requiredRole === 'USER' && (userRole === 'USER' || userRole === 'ROLE_USER')) {
         return true;
       }
-      // Direkt eşleştirme
       return userRole === requiredRole;
     });
   });
@@ -185,21 +170,19 @@ export function canAccessPage(pageName) {
   return hasAccess;
 }
 
-// İşlem yetkileri
 export const ACTION_PERMISSIONS = {
   'create-flight': ['ADMIN'],
   'edit-flight': ['ADMIN'],
   'delete-flight': ['ADMIN'],
   'bulk-upload': ['ADMIN'],
   'manage-users': ['ADMIN'],
-  'view-reports': ['ADMIN'], // USER kaldırıldı
+  'view-reports': ['ADMIN'],
   'export-data': ['ADMIN'],
-  'view-archive': ['ADMIN'], // Yeni eklendi
-  'view-system-status': ['ADMIN'] // Yeni eklendi
+  'view-archive': ['ADMIN'],
+  'view-system-status': ['ADMIN']
 };
 
 export function canPerformAction(action) {
-  // Kullanıcı giriş yapmamışsa erişim yok
   if (!isAuthenticated()) {
     return false;
   }
@@ -207,21 +190,16 @@ export function canPerformAction(action) {
   const userRoles = getUserRoles();
   const requiredRoles = ACTION_PERMISSIONS[action] || [];
   
-  if (requiredRoles.length === 0) return true; // Yetki belirtilmemişse erişime izin ver
+  if (requiredRoles.length === 0) return true;
   
-  // Rol eşleştirmesi - backend'den gelen roller ile frontend'deki roller arasında
   return requiredRoles.some(requiredRole => {
-    // Backend'den gelen roller ile frontend'deki roller arasında eşleştirme
     return userRoles.some(userRole => {
-      // ADMIN rolü için eşleştirme
       if (requiredRole === 'ADMIN' && (userRole === 'ADMIN' || userRole === 'ROLE_ADMIN')) {
         return true;
       }
-      // USER rolü için eşleştirme
       if (requiredRole === 'USER' && (userRole === 'USER' || userRole === 'ROLE_USER')) {
         return true;
       }
-      // Direkt eşleştirme
       return userRole === requiredRole;
     });
   });

@@ -26,21 +26,18 @@ public class TestController {
         try {
             log.info("🧪 Test uçuşları ekleniyor...");
             
-            // Mevcut uçuşları kontrol et
             List<FlightResponseDTO> existingFlights = flightService.getAllFlights();
             log.info("📊 Mevcut uçuş sayısı: {}", existingFlights.size());
             
-            // Yeni test uçuşları ekle (TK0006-TK0010)
             for (int i = 6; i <= 10; i++) {
                 FlightRequestDTO testFlight = new FlightRequestDTO();
                 testFlight.setFlightNumber("TK00" + String.format("%02d", i));
-                testFlight.setAirlineId(1L); // Turkish Airlines
-                testFlight.setOriginStationId(1L); // IST
-                testFlight.setDestinationStationId(2L); // SAW
-                testFlight.setAircraftId(1L); // B737
+                testFlight.setAirlineId(1L);
+                testFlight.setOriginStationId(1L);
+                testFlight.setDestinationStationId(2L);
+                testFlight.setAircraftId(1L);
                 testFlight.setStatus(FlightStatus.ON_TIME);
                 
-                // Rastgele tarih (2-8 saat sonra)
                 LocalDateTime now = LocalDateTime.now();
                 LocalDateTime departure = now.plusHours(2 + new Random().nextInt(6));
                 LocalDateTime arrival = departure.plusHours(1 + new Random().nextInt(2));
@@ -72,7 +69,6 @@ public class TestController {
                 boolean needsUpdate = false;
                 FlightRequestDTO updateRequest = new FlightRequestDTO();
                 
-                // Mevcut değerleri kopyala
                 updateRequest.setFlightNumber(flight.getFlightNumber());
                 updateRequest.setAirlineId(flight.getAirlineId());
                 updateRequest.setOriginStationId(flight.getOriginStationId());
@@ -80,7 +76,6 @@ public class TestController {
                 updateRequest.setAircraftId(flight.getAircraftId());
                 updateRequest.setStatus(flight.getStatus());
                 
-                // Eğer kalkış zamanı null ise
                 if (flight.getScheduledDeparture() == null) {
                     LocalDateTime now = LocalDateTime.now();
                     LocalDateTime departure = now.plusHours(2 + new Random().nextInt(6));
@@ -92,7 +87,6 @@ public class TestController {
                     updateRequest.setScheduledDeparture(flight.getScheduledDeparture());
                 }
                 
-                // Eğer varış zamanı null ise
                 if (flight.getScheduledArrival() == null) {
                     LocalDateTime departure = updateRequest.getScheduledDeparture() != null ? 
                             updateRequest.getScheduledDeparture() : LocalDateTime.now().plusHours(3);
@@ -105,7 +99,6 @@ public class TestController {
                     updateRequest.setScheduledArrival(flight.getScheduledArrival());
                 }
                 
-                // Eğer güncelleme gerekiyorsa
                 if (needsUpdate) {
                     flightService.updateFlight(flight.getId(), updateRequest);
                     fixedCount++;

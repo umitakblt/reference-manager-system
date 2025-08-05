@@ -8,18 +8,14 @@ import router from './router'
 
 const app = createApp(App)
 
-// Pinia store'u ekle
 app.use(createPinia())
 
-// Element Plus UI kütüphanesini ekle
 app.use(ElementPlus)
 
-// Element Plus ikonlarını ekle
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
   app.component(key, component)
 }
 
-// Router'ı ekle
 app.use(router)
 
 app.mount('#app') 

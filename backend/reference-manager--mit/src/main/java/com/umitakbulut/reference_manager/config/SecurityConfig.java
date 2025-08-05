@@ -37,13 +37,18 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/v1/flights/**").permitAll()
+                        .requestMatchers("/api/v1/stations/**").permitAll()
+                        .requestMatchers("/api/v1/airlines/**").permitAll()
+                        .requestMatchers("/api/v1/aircrafts/**").permitAll()
+                        .requestMatchers("/api/v1/flight-types/**").permitAll()
+                        .requestMatchers("/api/v1/routes/**").permitAll()
                         .requestMatchers("/api/redis/**").permitAll()
                         .requestMatchers("/api/test/**").permitAll()
-                        .requestMatchers("/ws/**").permitAll() // WebSocket endpoint'i için izin
-                        .requestMatchers("/ws").permitAll() // WebSocket root endpoint
-                        .requestMatchers("/ws/websocket/**").permitAll() // SockJS endpoint'leri
-                        .requestMatchers("/websocket/**").permitAll() // Native WebSocket endpoint'i
-                        .requestMatchers("/websocket").permitAll() // Native WebSocket root endpoint
+                        .requestMatchers("/ws/**").permitAll()
+                        .requestMatchers("/ws").permitAll()
+                        .requestMatchers("/ws/websocket/**").permitAll()
+                        .requestMatchers("/websocket/**").permitAll()
+                        .requestMatchers("/websocket").permitAll()
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/swagger-ui.html").permitAll()
                         .requestMatchers("/swagger-ui/index.html").permitAll()

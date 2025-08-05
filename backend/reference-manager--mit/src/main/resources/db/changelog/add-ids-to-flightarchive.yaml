@@ -1,0 +1,33 @@
+databaseChangeLog:
+  - changeSet:
+      id: 11
+      author: umit
+      changes:
+        - addColumn:
+            tableName: flight_archive
+            columns:
+              - column:
+                  name: airline_id
+                  type: BIGINT
+                  constraints:
+                    nullable: true
+              - column:
+                  name: aircraft_id
+                  type: BIGINT
+                  constraints:
+                    nullable: true
+              - column:
+                  name: origin_station_id
+                  type: BIGINT
+                  constraints:
+                    nullable: true
+              - column:
+                  name: destination_station_id
+                  type: BIGINT
+                  constraints:
+                    nullable: true
+              - column:
+                  name: flight_type_id
+                  type: BIGINT
+                  constraints:
+                    nullable: true 

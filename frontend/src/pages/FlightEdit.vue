@@ -217,7 +217,7 @@ export default {
     const loadFlight = async () => {
       try {
         const flightId = route.params.id
-        const response = await api.get(`/flights/${flightId}`)
+        const response = await api.get(`/v1/flights/${flightId}`)
         const flight = response.data
         
         Object.assign(flightForm, {
@@ -241,10 +241,10 @@ export default {
     const loadReferenceData = async () => {
       try {
         const [airlinesRes, aircraftsRes, stationsRes, flightTypesRes] = await Promise.all([
-          api.get('/airlines'),
-          api.get('/aircrafts'),
-          api.get('/stations'),
-          api.get('/flight-types')
+          api.get('/v1/airlines'),
+          api.get('/v1/aircrafts'),
+          api.get('/v1/stations'),
+          api.get('/v1/flight-types')
         ])
         
         airlines.value = airlinesRes.data
@@ -263,19 +263,17 @@ export default {
         submitting.value = true
         
         const flightId = route.params.id
-        const response = await api.put(`/flights/${flightId}`, flightForm)
+        const response = await api.put(`/v1/flights/${flightId}`, flightForm)
         const updatedFlight = response.data
         
         ElMessage.success('Uçuş başarıyla güncellendi')
         
-        // WebSocket ile gerçek zamanlı güncelleme gönder
         try {
           console.log('📤 WebSocket ile uçuş güncellemesi gönderiliyor...')
           nativeWebSocketService.sendFlightUpdate('UPDATE', updatedFlight)
           console.log('✅ WebSocket mesajı gönderildi')
         } catch (wsError) {
           console.error('❌ WebSocket mesajı gönderilemedi:', wsError)
-          // WebSocket hatası olsa bile uçuş güncelleme işlemi başarılı
         }
         
         router.push('/flights')

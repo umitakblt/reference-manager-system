@@ -65,15 +65,14 @@ const stations = ref([])
 const loadReferenceData = async () => {
   try {
     const [airlinesRes, aircraftsRes, stationsRes] = await Promise.all([
-      api.get('/airlines'),
-      api.get('/aircrafts'),
-      api.get('/stations')
+      api.get('/v1/airlines'),
+      api.get('/v1/aircrafts'),
+      api.get('/v1/stations')
     ])
     airlines.value = airlinesRes.data
     aircrafts.value = aircraftsRes.data
     stations.value = stationsRes.data
   } catch (err) {
-    // ignore
   }
 }
 
@@ -83,7 +82,7 @@ onMounted(() => {
 
 const submitFlight = async () => {
   try {
-    await api.post('/flights', form.value)
+    await api.post('/v1/flights', form.value)
 
     successMessage.value = 'Uçuş başarıyla eklendi!'
     errorMessage.value = ''

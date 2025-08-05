@@ -1,7 +1,9 @@
 package com.umitakbulut.reference_manager.service.impl;
 
 import com.umitakbulut.reference_manager.dto.request.RegisterRequestDTO;
+import com.umitakbulut.reference_manager.dto.request.UserUpdateRequestDTO;
 import com.umitakbulut.reference_manager.dto.response.UserResponseDTO;
+import com.umitakbulut.reference_manager.dto.response.RoleResponseDTO;
 import com.umitakbulut.reference_manager.entity.User;
 import com.umitakbulut.reference_manager.exception.NotFoundException;
 import com.umitakbulut.reference_manager.kafka.KafkaProducer;
@@ -35,8 +37,18 @@ public class UserServiceImpl implements UserService {
     public List<UserResponseDTO> getAllUsers() {
         return userRepository.findAll()
                 .stream()
-                .map(userMapper::toDto)
+                .map(this::mapUserWithRoles)
                 .collect(Collectors.toList());
+    }
+
+    private UserResponseDTO mapUserWithRoles(User user) {
+        UserResponseDTO dto = userMapper.toDto(user);
+        RoleResponseDTO roleDto = new RoleResponseDTO();
+        roleDto.setId(1L);
+        roleDto.setName(user.getRole());
+        roleDto.setDescription(user.getRole().equals("ADMIN") ? "Sistem Yöneticisi" : "Kullanıcı");
+        dto.setRoles(List.of(roleDto));
+        return dto;
     }
 
     @Override
@@ -56,7 +68,10 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new NotFoundException("User not found"));
         
         existing.setEmail(requestDTO.getEmail());
+        existing.setFirstName(requestDTO.getFirstName());
+        existing.setLastName(requestDTO.getLastName());
         existing.setRole(requestDTO.getRole());
+        existing.setEnabled(requestDTO.getEnabled());
         
         if (requestDTO.getPassword() != null && !requestDTO.getPassword().trim().isEmpty()) {
             existing.setPassword(passwordEncoder.encode(requestDTO.getPassword()));
@@ -66,7 +81,29 @@ public class UserServiceImpl implements UserService {
 
         kafkaProducer.sendUser(saved);
 
-        return userMapper.toDto(saved);
+        return mapUserWithRoles(saved);
+    }
+
+    @Override
+    public UserResponseDTO updateUser(Long id, UserUpdateRequestDTO requestDTO) {
+        User existing = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("User not found"));
+        
+        existing.setEmail(requestDTO.getEmail());
+        existing.setFirstName(requestDTO.getFirstName());
+        existing.setLastName(requestDTO.getLastName());
+        existing.setRole(requestDTO.getRole());
+        existing.setEnabled(requestDTO.getEnabled());
+        
+        if (requestDTO.getPassword() != null && !requestDTO.getPassword().trim().isEmpty()) {
+            existing.setPassword(passwordEncoder.encode(requestDTO.getPassword()));
+        }
+        
+        User saved = userRepository.save(existing);
+
+        kafkaProducer.sendUser(saved);
+
+        return mapUserWithRoles(saved);
     }
 
     @Override

@@ -24,12 +24,14 @@ public class FlightResponseDTO implements Serializable {
     private Long aircraftId;
     private Long originStationId;
     private Long destinationStationId;
+    private Long flightTypeId;
     
-    // İlişkili entity'ler - sadece gerekli bilgiler
     private String airlineName;
     private String aircraftModel;
     private String originStationName;
     private String destinationStationName;
+    private String originStationCode;
+    private String destinationStationCode;
     private String flightTypeName;
     
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -37,6 +39,9 @@ public class FlightResponseDTO implements Serializable {
     
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime scheduledArrival;
+    
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime archivedAt;
     
     private FlightStatus status;
     private String description;
