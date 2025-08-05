@@ -59,7 +59,7 @@ springdoc:
 
 jwt:
   secret: eW91ci1zdXBlci1zZWNyZXQtand0LWtleS1mb3ItZmxpZ2h0LW1hbmFnZW1lbnQtc3lzdGVtLTIwMjQ=
-  expiration: 86400000 # 24 saat
+  expiration: 86400000
 
 server:
   port: 8083
