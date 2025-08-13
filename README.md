@@ -2,7 +2,7 @@
 
 ## Kurulum
 
-1. Java 17+ ve Node.js 16+ kurulu olmalı.
+1. Java 17+ kurulu olmalı.
 2. Backend için:
    ```sh
    cd backend/reference-manager--mit
